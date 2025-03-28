@@ -3,7 +3,7 @@ package packages
 import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/faelmori/logz"
+	l "github.com/faelmori/logz"
 	cmp "github.com/faelmori/xtui/components"
 	t "github.com/faelmori/xtui/types"
 	"os"
@@ -22,6 +22,7 @@ type AppInfo struct {
 
 // AppsTableHandler lida com a tabela de aplicativos.
 type AppsTableHandler struct {
+	t.TableDataHandler
 	apps []AppInfo // Lista de aplicativos
 }
 
@@ -66,7 +67,7 @@ func GenDepsScript(depsList []string, scriptPath string, validationFilePath stri
 	dependencies=(
 	`
 	if len(depsList) == 0 {
-		logz.Error("Dependencies list is empty", nil)
+		l.Error("Dependencies list is empty", nil)
 		return fmt.Errorf("lista de dependências vazia")
 	}
 	for _, dep := range depsList {
@@ -103,7 +104,7 @@ func GenDepsScript(depsList []string, scriptPath string, validationFilePath stri
 	`
 	err := os.WriteFile(scriptPath, []byte(scriptContent), 0755) //nolint:gosec
 	if err != nil {
-		logz.Error("Error writing deps script: "+err.Error(), nil)
+		l.Error("Error writing deps script: "+err.Error(), nil)
 		return fmt.Errorf("erro ao escrever o script de dependências")
 	}
 	return nil
@@ -122,7 +123,7 @@ func InstallAppsShell(scriptPath string) error {
 	cmd.Stdin = os.Stdin // Permite interação do usuário
 	err := cmd.Run()
 	if err != nil {
-		logz.Error("Error running deps script: "+err.Error(), nil)
+		l.Error("Error running deps script: "+err.Error(), nil)
 		return err
 	}
 	return nil
@@ -138,24 +139,24 @@ func InstallApps(args ...string) error {
 // getInstalledAppsHandler obtém os aplicativos instalados filtrados por nome, status ou método de instalação.
 // Recebe o nome, status e método de instalação.
 // Retorna um ponteiro para AppsTableHandler e um erro, se houver.
-func getInstalledAppsHandler(name string, status string, method string) (*AppsTableHandler, error) {
+func getInstalledAppsHandler(name string, status string, method string) (t.TableDataHandler, error) {
 	// Filtra os aplicativos instalados por nome, status ou method de instalação (auto/manual) usando dpkg-query e se preciso grep
-	nameFilter := ""
-	if name != "" {
-		nameFilter = fmt.Sprintf("| grep -i %s", name)
-	}
-	statusFilter := ""
-	if status != "" {
-		statusFilter = fmt.Sprintf("| grep -i %s", status)
-	}
-	methodFilter := ""
-	if method != "" {
-		methodFilter = fmt.Sprintf("| grep -i %s", method)
-	}
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("dpkg-query -W -f='${Package}\\t${Version}\\t${Status}\\t${Description}\\n' %s %s %s", nameFilter, statusFilter, methodFilter)) //nolint:gosec
+	//nameFilter := ""
+	//if name != "" {
+	//	nameFilter = fmt.Sprintf("| grep -i %s", name)
+	//}
+	//statusFilter := ""
+	//if status != "" {
+	//	statusFilter = fmt.Sprintf("| grep -i %s", status)
+	//}
+	//methodFilter := ""
+	//if method != "" {
+	//	methodFilter = fmt.Sprintf("| grep -i %s", method)
+	//}
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("dpkg-query -W -f='${Package}\\t${Version}\\t${Status}\\t${Description}\\n'")) //nolint:gosec
 	output, err := cmd.Output()
 	if err != nil {
-		logz.Error("Error getting installed apps: "+err.Error(), nil)
+		l.Error("Error getting installed apps: "+err.Error(), nil)
 		return nil, fmt.Errorf("erro ao obter aplicativos instalados")
 	}
 	var apps []AppInfo //nolint:prealloc
@@ -211,26 +212,7 @@ func ShowInstalledAppsTable(args ...string) error {
 		"row":    lipgloss.Color("#252"),
 	}
 
-	var fields []t.Field
-	for _, header := range handler.GetHeaders() {
-		fields = append(fields, &t.InputField{
-			Ph:  header,
-			Tp:  "text",
-			Val: "",
-			Req: false,
-			Min: 0,
-			Max: 0,
-			Err: "",
-			Vld: nil,
-		})
-	}
-	return cmp.StartTableScreen(
-		t.FormConfig{
-			Title:  "Installed Apps",
-			Fields: fields,
-		},
-		customStyles,
-	)
+	return cmp.StartTableScreen(handler, customStyles)
 }
 
 // installGoogleAuthenticator instala o Google Authenticator.

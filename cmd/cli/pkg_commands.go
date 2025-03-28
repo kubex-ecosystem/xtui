@@ -2,9 +2,8 @@ package cli
 
 import (
 	"fmt"
-	"github.com/faelmori/logz"
+	l "github.com/faelmori/logz"
 	p "github.com/faelmori/xtui/packages"
-	"github.com/faelmori/xtui/types"
 	"github.com/spf13/cobra"
 	"os"
 	"reflect"
@@ -14,18 +13,12 @@ import (
 // appsCmdsList retorna uma lista de comandos Cobra relacionados a aplicativos.
 // Retorna um slice de ponteiros para comandos Cobra e um erro, se houver.
 func PkgCmdsList() []*cobra.Command {
-	cmdAdd := appsCmdAdd()
-	cmdList := appsCmdList()
-	cmdCheckDeps := checkDepsCmd()
-	cmdAddAppsShell := appsCmdAddShell()
-	cmdGenInstScript := appsCmdGenInstScript()
-
 	return []*cobra.Command{
-		cmdAdd,
-		cmdList,
-		cmdCheckDeps,
-		cmdAddAppsShell,
-		cmdGenInstScript,
+		appsCmdAdd(),
+		appsCmdList(),
+		checkDepsCmd(),
+		appsCmdAddShell(),
+		appsCmdGenInstScript(),
 	}
 }
 
@@ -84,7 +77,7 @@ func appsCmdGenInstScript() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			depsList, depsListErr := getDepsList()
 			if depsListErr != nil {
-				logz.Error("Error getting dependencies list: "+depsListErr.Error(), nil)
+				l.Error("Error getting dependencies list: "+depsListErr.Error(), nil)
 				return depsListErr
 			}
 			return GenDepsScriptHandler(depsList, args...)
@@ -117,6 +110,8 @@ func appsCmdAddShell() *cobra.Command {
 // appsCmdList cria um comando Cobra para listar aplicativos.
 // Retorna um ponteiro para o comando Cobra configurado.
 func appsCmdList() *cobra.Command {
+	var name, status, method string
+
 	cmd := &cobra.Command{
 		Use: "list",
 		Annotations: GetDescriptions(
@@ -127,19 +122,8 @@ func appsCmdList() *cobra.Command {
 			false,
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			nameFlagValue, _ := cmd.Flags().GetStringArray("name")
-			statusFlagValue, _ := cmd.Flags().GetString("status")
-			methodFlagValue, _ := cmd.Flags().GetString("method")
-			newArgs := []string{strings.Join(nameFlagValue, " "), statusFlagValue, methodFlagValue}
-			args = append(args, newArgs...)
-
-			availableProperties := getAvailableProperties()
-			if len(availableProperties) > 0 {
-				adaptedArgs := adaptArgsToProperties(args, availableProperties)
-				return p.ShowInstalledAppsTable(adaptedArgs...)
-			}
-
-			return p.ShowInstalledAppsTable(args...)
+			l.Info("Args: "+strings.Join([]string{name, status, method}, " "), nil)
+			return p.ShowInstalledAppsTable(name, status, method)
 		},
 	}
 
@@ -225,19 +209,4 @@ func InstallDepsHandler(args ...string) error {
 	}
 	scriptPath = args[0]
 	return p.InstallApps(scriptPath)
-}
-
-func getAvailableProperties() map[string]string {
-	return map[string]string{
-		"property1": "value1",
-		"property2": "value2",
-	}
-}
-
-func adaptArgsToProperties(args []string, properties map[string]string) []string {
-	adaptedArgs := args
-	for key, value := range properties {
-		adaptedArgs = append(adaptedArgs, fmt.Sprintf("--%s=%s", key, value))
-	}
-	return adaptedArgs
 }

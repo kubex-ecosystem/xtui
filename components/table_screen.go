@@ -11,6 +11,9 @@ import (
 	"github.com/charmbracelet/lipgloss/table"
 	"github.com/faelmori/logz"
 	. "github.com/faelmori/xtui/types"
+	"github.com/johnfercher/maroto/pkg/consts"
+	p "github.com/johnfercher/maroto/pkg/pdf"
+	"github.com/johnfercher/maroto/pkg/props"
 	"gopkg.in/yaml.v2"
 	"os"
 	"sort"
@@ -19,7 +22,7 @@ import (
 )
 
 type TableRenderer struct {
-	config       FormConfig
+	tbHandler    TableDataHandler
 	kTb          *table.Table
 	headers      []string
 	rows         [][]string
@@ -35,13 +38,9 @@ type TableRenderer struct {
 	visibleCols  map[string]bool
 }
 
-func NewTableRenderer(config FormConfig, customStyles map[string]lipgloss.Color) *TableRenderer {
-	headers := make([]string, len(config.Fields))
-	for i, field := range config.Fields {
-		headers[i] = field.Placeholder()
-	}
-
-	rows := make([][]string, 0)
+func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) *TableRenderer {
+	headers := tbHandler.GetHeaders()
+	rows := tbHandler.GetRows()
 	re := lipgloss.NewRenderer(os.Stdout)
 	baseStyle := re.NewStyle().Padding(0, 1)
 	headerStyle := baseStyle.Foreground(lipgloss.Color("252")).Bold(true)
@@ -115,7 +114,7 @@ func NewTableRenderer(config FormConfig, customStyles map[string]lipgloss.Color)
 	}
 
 	return &TableRenderer{
-		config:       config,
+		tbHandler:    tbHandler,
 		kTb:          t,
 		headers:      headers,
 		rows:         rows,
@@ -225,7 +224,7 @@ func (k *TableRenderer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			k.ExportToPDF("exported_data.pdf")
 		case "ctrl+m":
 			k.ExportToMarkdown("exported_data.md")
-		case "ctrl+c":
+		case "ctrl+k":
 			k.ToggleColumnVisibility()
 		default:
 			k.filter += message.String()
@@ -358,16 +357,7 @@ func (k *TableRenderer) ExportToYAML(filename string) {
 	defer func(file *os.File) {
 		_ = file.Close()
 	}(file)
-
-	data := make([]map[string]string, len(k.filteredRows))
-	for i, row := range k.filteredRows {
-		rowData := make(map[string]string)
-		for j, cell := range row {
-			rowData[k.headers[j]] = cell
-		}
-		data[i] = rowData
-	}
-
+	data := k.GetObjectMap()
 	encoder := yaml.NewEncoder(file)
 	defer func(encoder *yaml.Encoder) {
 		_ = encoder.Close()
@@ -401,16 +391,7 @@ func (k *TableRenderer) ExportToJSON(filename string) {
 	defer func(file *os.File) {
 		_ = file.Close()
 	}(file)
-
-	data := make([]map[string]string, len(k.filteredRows))
-	for i, row := range k.filteredRows {
-		rowData := make(map[string]string)
-		for j, cell := range row {
-			rowData[k.headers[j]] = cell
-		}
-		data[i] = rowData
-	}
-
+	data := k.GetObjectMap()
 	encoder := json.NewEncoder(file)
 	if err := encoder.Encode(data); err != nil {
 		logz.Error("Error writing data to JSON.", map[string]interface{}{
@@ -420,7 +401,6 @@ func (k *TableRenderer) ExportToJSON(filename string) {
 		})
 		return
 	}
-
 	logz.Info("Data exported to JSON.", map[string]interface{}{
 		"context":  "ExportToJSON",
 		"filename": filename,
@@ -440,16 +420,7 @@ func (k *TableRenderer) ExportToXML(filename string) {
 	defer func(file *os.File) {
 		_ = file.Close()
 	}(file)
-
-	data := make([]map[string]string, len(k.filteredRows))
-	for i, row := range k.filteredRows {
-		rowData := make(map[string]string)
-		for j, cell := range row {
-			rowData[k.headers[j]] = cell
-		}
-		data[i] = rowData
-	}
-
+	data := k.GetObjectMap()
 	encoder := xml.NewEncoder(file)
 	if err := encoder.Encode(data); err != nil {
 		logz.Error("Error writing data to XML.", map[string]interface{}{
@@ -459,7 +430,6 @@ func (k *TableRenderer) ExportToXML(filename string) {
 		})
 		return
 	}
-
 	logz.Info("Data exported to XML.", map[string]interface{}{
 		"context":  "ExportToXML",
 		"filename": filename,
@@ -471,7 +441,39 @@ func (k *TableRenderer) ExportToExcel(filename string) {
 }
 
 func (k *TableRenderer) ExportToPDF(filename string) {
-	// Implementation for exporting to PDF
+	m := p.NewMaroto(consts.Landscape, consts.Letter)
+	m.SetBorder(true)
+
+	// Add headers
+	m.Row(10, func() {
+		for _, header := range k.headers {
+			w := uint(12 / len(k.headers))
+			m.Col(w, func() {
+				m.Text(header, props.Text{Align: consts.Center, Style: consts.Bold})
+			})
+		}
+	})
+
+	// Add rows
+	for _, row := range k.filteredRows {
+		m.Row(10, func() {
+			for _, cell := range row {
+				w := uint(12 / len(row))
+				m.Col(w, func() {
+					m.Text(cell, props.Text{Align: consts.Left})
+				})
+			}
+		})
+	}
+
+	// Save the PDF
+	err := m.OutputFileAndClose(filename)
+	if err != nil {
+		logz.Error("Could not save PDF: "+err.Error(), map[string]interface{}{
+			"context":  "ExportToPDF",
+			"filename": filename,
+		})
+	}
 }
 
 func (k *TableRenderer) ExportToMarkdown(filename string) {
@@ -485,33 +487,80 @@ func (k *TableRenderer) ToggleColumnVisibility() {
 	k.kTb = k.kTb.Rows(k.GetCurrentPageRows()...)
 }
 
-func GetTableScreen(config FormConfig, customStyles map[string]lipgloss.Color) string {
-	k := NewTableRenderer(config, customStyles)
+func (k *TableRenderer) GetHeaders() []string { return k.headers }
+
+func (k *TableRenderer) GetRows() [][]string { return k.rows }
+
+func (k *TableRenderer) GetArrayMap() map[string][]string {
+	m := make(map[string][]string)
+	for _, row := range k.rows {
+		m[row[0]] = row[1:]
+	}
+	return m
+}
+
+func (k *TableRenderer) GetHashMap() map[string]string {
+	m := make(map[string]string)
+	for _, row := range k.rows {
+		m[row[0]] = row[1]
+	}
+	return m
+}
+
+func (k *TableRenderer) GetObjectMap() []map[string]string {
+	var m []map[string]string
+	for _, row := range k.rows {
+		m = append(m, map[string]string{row[0]: row[1]})
+	}
+	return m
+}
+
+func (k *TableRenderer) GetByteMap() map[string][]byte {
+	m := make(map[string][]byte)
+	for _, row := range k.rows {
+		m[row[0]] = []byte(row[1])
+	}
+	return m
+}
+
+func GetTableScreen(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) string {
+	k := NewTableRenderer(tbHandler, customStyles)
 	return k.View()
 }
 
-func StartTableScreen(config FormConfig, customStyles map[string]lipgloss.Color) error {
-	k := NewTableRenderer(config, customStyles)
+func StartTableScreen(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) error {
+	k := NewTableRenderer(tbHandler, customStyles)
 
 	p := tea.NewProgram(k, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		logz.Error("Error running table screen: "+err.Error(), map[string]interface{}{
-			"context": "StartTableScreen",
-			"config":  config,
+			"context":   "StartTableScreen",
+			"tbHandler": tbHandler,
 		})
 		return nil
 	}
 	return nil
 }
 
-func NavigateAndExecuteTable(config FormConfig, customStyles map[string]lipgloss.Color) error {
-	k := NewTableRenderer(config, customStyles)
+func StartTableScreenFromRenderer(k *TableRenderer) error {
+	p := tea.NewProgram(k, tea.WithAltScreen())
+	if _, err := p.Run(); err != nil {
+		logz.Error("Error running table screen: "+err.Error(), map[string]interface{}{
+			"context": "StartTableScreenFromRenderer",
+		})
+		return err
+	}
+	return nil
+}
+
+func NavigateAndExecuteTable(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) error {
+	k := NewTableRenderer(tbHandler, customStyles)
 
 	p := tea.NewProgram(k, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		logz.Error("Error running table screen: "+err.Error(), map[string]interface{}{
-			"context": "NavigateAndExecuteTable",
-			"config":  config,
+			"context":   "NavigateAndExecuteTable",
+			"tbHandler": tbHandler,
 		})
 		return nil
 	}

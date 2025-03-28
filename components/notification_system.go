@@ -18,7 +18,7 @@ type Notification struct {
 	Type    NotificationType
 }
 
-func DisplayNotification(notification Notification) {
+func ShowNotification(notification Notification) {
 	var style lipgloss.Style
 
 	switch notification.Type {
@@ -36,13 +36,13 @@ func DisplayNotification(notification Notification) {
 }
 
 func DisplayInfoNotification(message string) {
-	DisplayNotification(Notification{Message: message, Type: Info})
+	ShowNotification(Notification{Message: message, Type: Info})
 }
 
 func DisplayWarningNotification(message string) {
-	DisplayNotification(Notification{Message: message, Type: Warning})
+	ShowNotification(Notification{Message: message, Type: Warning})
 }
 
 func DisplayErrorNotification(message string) {
-	DisplayNotification(Notification{Message: message, Type: Error})
+	ShowNotification(Notification{Message: message, Type: Error})
 }

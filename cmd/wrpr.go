@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	l "github.com/faelmori/logz"
 	"github.com/faelmori/xtui/cmd/cli"
-	. "github.com/faelmori/xtui/services"
-	. "github.com/faelmori/xtui/wrappers"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // XTui representa a estrutura do módulo ui.
@@ -67,32 +67,14 @@ func (m *XTui) concatenateExamples() string {
 
 // Command retorna o comando cobra para o módulo.
 func (m *XTui) Command() *cobra.Command {
-	var cd string
-	var opts []string
+	l.GetLogger("XTuI").Debug(fmt.Sprintf("Creating command for XTuI with flags: %v", os.Args), nil)
 
 	c := &cobra.Command{
 		Use:         m.Module(),
 		Aliases:     []string{m.Alias()},
 		Example:     m.concatenateExamples(),
 		Annotations: cli.GetDescriptions([]string{m.ShortDescription(), m.LongDescription()}, false),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			switch cd {
-			case "logz":
-				return LogViewer(opts...)
-			case "deps":
-				return InstallDependenciesWithUI(opts...)
-			case "tcp-status":
-				return TcpStatus(args...)
-			case "navigate":
-				return NavigateAndExecuteCommand(cmd, args)
-			}
-
-			return fmt.Errorf("error: %s", opts[0])
-		},
 	}
-
-	c.Flags().StringArrayVarP(&opts, "opts", "o", []string{}, "Options")
-	c.Flags().StringVarP(&cd, "cmd", "c", "logz", "Log file viewer")
 
 	// Adiciona os comandos relacionados ao módulo
 
@@ -139,12 +121,12 @@ func (m *XTui) Command() *cobra.Command {
 	c.AddCommand(formCmdRoot)
 
 	dataCmdRoot := &cobra.Command{
-		Use:     "forms",
-		Aliases: []string{"frm", "form"},
+		Use:     "viewer",
+		Aliases: []string{"view", "v"},
 		Annotations: cli.GetDescriptions(
 			[]string{
-				"Terminal forms builder",
-				"Build terminal forms with validation, input types, and much more",
+				"Terminal features viewer",
+				"View terminal features like logs, network status, and much more",
 			}, false,
 		),
 		RunE: func(cmd *cobra.Command, args []string) error { return cmd.Help() },

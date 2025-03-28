@@ -7,7 +7,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/faelmori/logz"
-	"github.com/faelmori/xtui/types"
 	"log"
 	"os/exec"
 	"strings"

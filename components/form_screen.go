@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"github.com/faelmori/logz"
+	"reflect"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
@@ -36,11 +37,11 @@ type FormModel struct {
 	ErrorMessage string
 }
 
-func initialFormModel(config Config) FormModel {
+func initialFormModel(config FormConfig) FormModel {
 	cfg := &config
 	var inputs []FormInputObject[any]
 
-	for _, field := range cfg.Fields.Inputs() {
+	for _, field := range cfg.Fields {
 		inputs = append(inputs, field)
 	}
 
@@ -53,7 +54,7 @@ func initialFormModel(config Config) FormModel {
 		Title:        cfg.Title,
 		FocusIndex:   0,
 		CursorMode:   cursor.CursorBlink,
-		Fields:       config.Fields.Inputs(),
+		Fields:       config.Fields,
 		Inputs:       make([]textinput.Model, len(inputs)),
 		ErrorMessage: "",
 	}
@@ -63,10 +64,13 @@ func initialFormModel(config Config) FormModel {
 		t = textinput.New()
 		t.Cursor.Style = cursorStyle
 		t.CharLimit = 32
-		t.Placeholder = field.(FormInput[any]).Placeholder()
-		t.SetValue(field.(FormInput[any]).String())
 
-		if field.(FormInput[any]).GetType().String() == "password" {
+		tField := NewFormInput(field)
+
+		t.Placeholder = tField.Placeholder()
+		t.SetValue(tField.String())
+
+		if tField.GetType().String() == "text" {
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
 		}
@@ -78,6 +82,7 @@ func initialFormModel(config Config) FormModel {
 		}
 
 		m.Inputs[i] = t
+
 	}
 
 	return m
@@ -207,20 +212,23 @@ func (m *FormModel) submit() tea.Cmd {
 	return tea.Quit
 }
 
-func ShowForm(config Config) (map[string]string, error) {
+func ShowForm(config FormConfig) (map[string]string, error) {
 	inputResult = make(map[string]string)
-	var newConfig Config
-	var newFields = config.Fields.Inputs()
+	var newConfig FormConfig
+	var newFields = config.Fields
 	if newFields == nil {
 		iNewConfig := FormConfig{
-			Title:  config.Title,
-			Fields: nil,
+			Title: config.Title,
+			FormFields: FormFields{
+				Title:  config.Title,
+				Fields: config.GetFields(),
+			},
 		}
-		newConfig = Config{
+		newConfig = FormConfig{
 			Title: iNewConfig.Title,
-			Fields: FormFields{
+			FormFields: FormFields{
 				Title:  iNewConfig.Title,
-				Fields: config.GetFields().Inputs(),
+				Fields: config.GetFields(),
 			},
 		}
 	}
@@ -255,22 +263,15 @@ func getAvailableProperties() map[string]string {
 
 func adaptInputsToProperties(inputs []FormInputObject[any], properties map[string]string) []FormInputObject[any] {
 	adaptedInputs := inputs
-	for key, value := range properties {
-		adaptedInputs = append(adaptedInputs, NewFormInputObject(&InputField{
-			Ph:  key,
-			Tp:  "text",
-			Val: value,
-			Req: false,
-			Min: 0,
-			Max: 100,
-			Err: "",
-			Vld: func(value string) error { return nil },
-		}))
+	for _, value := range properties {
+		vl := reflect.ValueOf(value)
+		v := NewInput(vl.Interface().(FormInputObject[any]))
+		adaptedInputs = append(adaptedInputs, v.GetValue())
 	}
 	return adaptedInputs
 }
 
-func NavigateAndExecuteForm(config Config) (map[string]string, error) {
+func NavigateAndExecuteForm(config FormConfig) (map[string]string, error) {
 	inputResult = make(map[string]string)
 	initialModel := initialFormModel(config)
 	_, resultModelErr := tea.NewProgram(&initialModel).Run()
@@ -285,7 +286,7 @@ func NavigateAndExecuteForm(config Config) (map[string]string, error) {
 	return inputResult, nil
 }
 
-func ShowFormWithNotification(config Config) (map[string]string, error) {
+func ShowFormWithNotification(config FormConfig) (map[string]string, error) {
 	inputResult = make(map[string]string)
 	initialModel := initialFormModel(config)
 	_, resultModelErr := tea.NewProgram(&initialModel).Run()

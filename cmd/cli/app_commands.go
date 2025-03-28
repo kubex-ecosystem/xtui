@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/faelmori/logz"
-	"github.com/faelmori/xtui/types"
+	. "github.com/faelmori/xtui/components"
 	. "github.com/faelmori/xtui/wrappers"
 	"github.com/spf13/cobra"
 	"strings"
@@ -73,21 +73,6 @@ func InstallApplicationsCommand() *cobra.Command {
 	return cmd
 }
 
-func getAvailableProperties() map[string]string {
-	return map[string]string{
-		"property1": "value1",
-		"property2": "value2",
-	}
-}
-
-func adaptArgsToProperties(args []string, properties map[string]string) []string {
-	adaptedArgs := args
-	for key, value := range properties {
-		adaptedArgs = append(adaptedArgs, fmt.Sprintf("--%s=%s", key, value))
-	}
-	return adaptedArgs
-}
-
 func NavigateAndExecuteCommand(cmd *cobra.Command, args []string) error {
 	// Detect command and its flags
 	commandName := cmd.Name()
@@ -109,26 +94,4 @@ func NavigateAndExecuteCommand(cmd *cobra.Command, args []string) error {
 
 	// Execute the command
 	return cmd.Execute()
-}
-
-func createFormConfig(commandName string, flags *pflag.FlagSet) Config {
-	var formFields []FormField
-
-	flags.VisitAll(func(flag *pflag.Flag) {
-		formFields = append(formFields, InputField{
-			Ph:  flag.Name,
-			Tp:  "text",
-			Val: flag.Value.String(),
-			Req: false,
-			Min: 0,
-			Max: 100,
-			Err: "",
-			Vld: func(value string) error { return nil },
-		})
-	})
-
-	return Config{
-		Title:  fmt.Sprintf("Configure %s Command", commandName),
-		Fields: FormFields{Fields: formFields},
-	}
 }
