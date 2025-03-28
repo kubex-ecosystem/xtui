@@ -1,8 +1,6 @@
 module github.com/faelmori/xtui
 
-go 1.24.0
-
-toolchain go1.24.1
+go 1.24.1
 
 require (
 	github.com/atotto/clipboard v0.1.4
