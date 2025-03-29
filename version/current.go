@@ -37,7 +37,7 @@ var (
 )
 
 const gitModelUrl = "https://github.com/faelmori/xtui.git"
-const currentVersionFallback = "v1.1.2" // First version with the version file
+const currentVersionFallback = "v1.1.3" // First version with the version file
 
 //go:embed CLI_VERSION
 var currentVersion string

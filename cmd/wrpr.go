@@ -6,6 +6,7 @@ import (
 	"github.com/faelmori/xtui/cmd/cli"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 )
 
 // XTui representa a estrutura do módulo ui.
@@ -135,8 +136,12 @@ func (m *XTui) Command() *cobra.Command {
 	c.AddCommand(dataCmdRoot)
 
 	setUsageDefinition(c)
+
 	for _, subCmd := range c.Commands() {
 		setUsageDefinition(subCmd)
+		if !strings.Contains(strings.Join(os.Args, " "), subCmd.Use) {
+			subCmd.Short = subCmd.Annotations["description"]
+		}
 	}
 
 	return c
