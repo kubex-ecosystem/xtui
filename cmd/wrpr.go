@@ -4,6 +4,7 @@ import (
 	"fmt"
 	l "github.com/faelmori/logz"
 	"github.com/faelmori/xtui/cmd/cli"
+	"github.com/faelmori/xtui/version"
 	"github.com/spf13/cobra"
 	"os"
 	"strings"
@@ -135,12 +136,16 @@ func (m *XTui) Command() *cobra.Command {
 	dataCmdRoot.AddCommand(cli.ViewsCmdsList()...)
 	c.AddCommand(dataCmdRoot)
 
-	setUsageDefinition(c)
+	c.AddCommand(version.CliCommand())
 
+	// Set usage definitions for the command and its subcommands
+	setUsageDefinition(c)
 	for _, subCmd := range c.Commands() {
-		setUsageDefinition(subCmd)
+		setUsageDefinition(c)
 		if !strings.Contains(strings.Join(os.Args, " "), subCmd.Use) {
-			subCmd.Short = subCmd.Annotations["description"]
+			if subCmd.Short == "" {
+				subCmd.Short = subCmd.Annotations["description"]
+			}
 		}
 	}
 
