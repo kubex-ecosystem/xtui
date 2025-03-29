@@ -17,7 +17,7 @@ const gitModelUrl = "https://github.com/faelmori/" + moduleName + ".git"
 const currentVersionFallback = "v1.1.4" // First version with the version file
 
 var (
-	l          = logger.NewLogger("Logz")
+	l          = logger.NewLogger(moduleAlias)
 	versionCmd = &cobra.Command{
 		Use:   "version",
 		Short: "Print the version number of " + moduleAlias,
