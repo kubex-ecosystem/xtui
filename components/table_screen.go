@@ -9,7 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
-	"github.com/faelmori/logz"
+	l "github.com/faelmori/logz"
 	. "github.com/faelmori/xtui/types"
 	"github.com/johnfercher/maroto/pkg/consts"
 	p "github.com/johnfercher/maroto/pkg/pdf"
@@ -21,6 +21,7 @@ import (
 	"strings"
 )
 
+// TableRenderer is responsible for rendering tables in the terminal with customizable styles and dynamic behavior.
 type TableRenderer struct {
 	tbHandler    TableDataHandler
 	kTb          *table.Table
@@ -38,7 +39,11 @@ type TableRenderer struct {
 	visibleCols  map[string]bool
 }
 
-func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) *TableRenderer {
+// StyleFunc defines a function that returns a lipgloss.Style based on row, column, and cell value.
+type StyleFunc func(row, col int, cellValue string) lipgloss.Style
+
+// NewTableRenderer creates a new TableRenderer with custom styles and an optional style function.
+func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) *TableRenderer {
 	headers := tbHandler.GetHeaders()
 	rows := tbHandler.GetRows()
 	re := lipgloss.NewRenderer(os.Stdout)
@@ -57,12 +62,8 @@ func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipglo
 		defaultTypeColors[key] = value
 	}
 
-	t := table.New().
-		Headers(headers...).
-		Rows(rows...).
-		Border(lipgloss.NormalBorder()).
-		BorderStyle(re.NewStyle().Foreground(lipgloss.Color("238"))).
-		StyleFunc(func(row, col int) lipgloss.Style {
+	if styleFunc == nil {
+		styleFunc = func(row, col int, cellValue string) lipgloss.Style {
 			if row == 0 {
 				return headerStyle
 			}
@@ -91,6 +92,37 @@ func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipglo
 				return baseStyle.Foreground(color)
 			}
 			return baseStyle.Foreground(lipgloss.Color("252"))
+		}
+	} else {
+		styleFunc = func(row, col int, cellValue string) lipgloss.Style {
+			if row == 0 {
+				return headerStyle
+			}
+			rowIndex := row - 1
+			if rowIndex < 0 || rowIndex >= len(rows) {
+				return baseStyle
+			}
+			return styleFunc(rowIndex, col, rows[rowIndex][col])
+		}
+	}
+
+	t := table.New().
+		Headers(headers...).
+		Rows(rows...).
+		Border(lipgloss.NormalBorder()).
+		BorderStyle(re.NewStyle().Foreground(lipgloss.Color("238"))).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == 0 {
+				return headerStyle
+			}
+			rowIndex := row - 1
+			if rowIndex < 0 || rowIndex >= len(rows) {
+				return baseStyle
+			}
+			if rows[rowIndex][1] == "Bug" {
+				return selectedStyle
+			}
+			return styleFunc(row, col, rows[row][col])
 		}).
 		Border(lipgloss.ThickBorder())
 
@@ -130,46 +162,12 @@ func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipglo
 	}
 }
 
+// Init initializes the table renderer.
 func (k *TableRenderer) Init() tea.Cmd {
 	return nil
 }
 
-func (k *TableRenderer) RowsNavigate(direction string) error {
-	if direction == "down" {
-		k.selectedRow++
-	} else {
-		k.selectedRow--
-	}
-
-	if k.selectedRow < 0 {
-		k.selectedRow = 0
-	}
-	if k.selectedRow >= len(k.filteredRows) {
-		k.selectedRow = len(k.filteredRows) - 1
-	}
-
-	if k.selectedRow >= 0 && len(k.filteredRows) > 0 {
-		k.kTb.StyleFunc(func(row, col int) lipgloss.Style {
-			if row == k.selectedRow {
-				return lipgloss.NewStyle().Foreground(lipgloss.Color("#01BE85")).Background(lipgloss.Color("#00432F"))
-			}
-			return lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
-		})
-	} else if k.selectedRow == 0 {
-		k.kTb.StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 1 {
-				return lipgloss.NewStyle().Foreground(lipgloss.Color("#01BE85")).Background(lipgloss.Color("#00432F"))
-			}
-			return lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
-		})
-	} else {
-		k.kTb.StyleFunc(func(row, col int) lipgloss.Style {
-			return lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
-		})
-	}
-	return nil
-}
-
+// Update updates the table renderer based on user input.
 func (k *TableRenderer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch message := msg.(type) {
@@ -230,11 +228,120 @@ func (k *TableRenderer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			k.filter += message.String()
 		}
 	}
-	k.kTb.ClearRows()                             // Limpa as linhas da tabela antes de adicionar as novas
-	k.kTb = k.kTb.Rows(k.GetCurrentPageRows()...) // Atualiza a tabela com as linhas atuais
+	k.kTb.ClearRows()                             // Clear the table rows before adding new ones
+	k.kTb = k.kTb.Rows(k.GetCurrentPageRows()...) // Update the table with the current rows
 	return k, cmd
 }
 
+// View returns the string representation of the table for rendering.
+func (k *TableRenderer) View() string {
+	helpText := "\nShortcuts:\n" +
+		"  - q, ctrl+c: Quit\n" +
+		"  - enter: Copy selected row to clipboard\n" +
+		"  - esc: Exit selection mode\n" +
+		"  - backspace: Remove last character from filter\n" +
+		"  - ctrl+o: Toggle sorting\n" +
+		"  - right: Next page\n" +
+		"  - left: Previous page\n" +
+		"  - down: Select next row\n" +
+		"  - up: Select previous row\n" +
+		"  - ctrl+e: Export to CSV\n" +
+		"  - ctrl+y: Export to YAML\n" +
+		"  - ctrl+j: Export to JSON\n" +
+		"  - ctrl+x: Export to XML\n" +
+		"  - ctrl+l: Export to Excel\n" +
+		"  - ctrl+p: Export to PDF\n" +
+		"  - ctrl+m: Export to Markdown\n" +
+		"  - ctrl+k: Toggle column visibility\n"
+
+	toggleHelpText := "\nPress ctrl+h to show/hide shortcuts."
+
+	if k.showHelp {
+		return fmt.Sprintf("\nFilter: %s\n\n%s\nPage: %d/%d\n%s%s", k.filter, k.kTb.String(), k.page+1, (len(k.filteredRows)+k.pageSize-1)/k.pageSize, helpText, toggleHelpText)
+	}
+	return fmt.Sprintf("\nFilter: %s\n\n%s\nPage: %d/%d\n%s", k.filter, k.kTb.String(), k.page+1, (len(k.filteredRows)+k.pageSize-1)/k.pageSize, toggleHelpText)
+}
+
+// GetHeaders returns the table headers.
+func (k *TableRenderer) GetHeaders() []string { return k.headers }
+
+// GetRows returns the table rows.
+func (k *TableRenderer) GetRows() [][]string { return k.rows }
+
+// GetArrayMap returns the table data as a map of arrays.
+func (k *TableRenderer) GetArrayMap() map[string][]string {
+	m := make(map[string][]string)
+	for _, row := range k.rows {
+		m[row[0]] = row[1:]
+	}
+	return m
+}
+
+// GetHashMap returns the table data as a hash map.
+func (k *TableRenderer) GetHashMap() map[string]string {
+	m := make(map[string]string)
+	for _, row := range k.rows {
+		m[row[0]] = row[1]
+	}
+	return m
+}
+
+// GetObjectMap returns the table data as a slice of maps.
+func (k *TableRenderer) GetObjectMap() []map[string]string {
+	var m []map[string]string
+	for _, row := range k.rows {
+		m = append(m, map[string]string{row[0]: row[1]})
+	}
+	return m
+}
+
+// GetByteMap returns the table data as a map of byte slices.
+func (k *TableRenderer) GetByteMap() map[string][]byte {
+	m := make(map[string][]byte)
+	for _, row := range k.rows {
+		m[row[0]] = []byte(row[1])
+	}
+	return m
+}
+
+// RowsNavigate navigates through the table rows.
+func (k *TableRenderer) RowsNavigate(direction string) error {
+	if direction == "down" {
+		k.selectedRow++
+	} else {
+		k.selectedRow--
+	}
+
+	if k.selectedRow < 0 {
+		k.selectedRow = 0
+	}
+	if k.selectedRow >= len(k.filteredRows) {
+		k.selectedRow = len(k.filteredRows) - 1
+	}
+
+	if k.selectedRow >= 0 && len(k.filteredRows) > 0 {
+		k.kTb.StyleFunc(func(row, col int) lipgloss.Style {
+			if row == k.selectedRow {
+				return lipgloss.NewStyle().Foreground(lipgloss.Color("#01BE85")).Background(lipgloss.Color("#00432F"))
+			}
+			return lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
+		})
+	} else if k.selectedRow == 0 {
+		k.kTb.StyleFunc(func(row, col int) lipgloss.Style {
+			if row == 1 {
+				return lipgloss.NewStyle().Foreground(lipgloss.Color("#01BE85")).Background(lipgloss.Color("#00432F"))
+			}
+			return lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
+		})
+	} else {
+		k.kTb.StyleFunc(func(row, col int) lipgloss.Style {
+			return lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
+		})
+	}
+	return nil
+}
+
+// ApplyFilter applies a filter to the table rows.
 func (k *TableRenderer) ApplyFilter() {
 	if k.filter == "" {
 		k.filteredRows = k.rows
@@ -253,6 +360,7 @@ func (k *TableRenderer) ApplyFilter() {
 	k.kTb = k.kTb.Rows(k.GetCurrentPageRows()...)
 }
 
+// SortRows sorts the table rows.
 func (k *TableRenderer) SortRows() {
 	sort.SliceStable(k.filteredRows, func(i, j int) bool {
 		if k.sortAsc {
@@ -263,6 +371,7 @@ func (k *TableRenderer) SortRows() {
 	k.kTb = k.kTb.Rows(k.GetCurrentPageRows()...)
 }
 
+// GetCurrentPageRows returns the rows for the current page.
 func (k *TableRenderer) GetCurrentPageRows() [][]string {
 	start := k.page * k.pageSize
 	end := start + k.pageSize
@@ -272,38 +381,11 @@ func (k *TableRenderer) GetCurrentPageRows() [][]string {
 	return k.filteredRows[start:end]
 }
 
-func (k *TableRenderer) View() string {
-	helpText := "\nAtalhos:\n" +
-		"  - q, ctrl+c: Sair\n" +
-		"  - enter: Copiar linha selecionada para o clipboard\n" +
-		"  - esc: Sair do modo seleção\n" +
-		"  - backspace: Remover último caractere do filtro\n" +
-		"  - ctrl+o: Alternar ordenação\n" +
-		"  - right: Próxima página\n" +
-		"  - left: Página anterior\n" +
-		"  - down: Selecionar próxima linha\n" +
-		"  - up: Selecionar linha anterior\n" +
-		"  - ctrl+e: Exportar para CSV\n" +
-		"  - ctrl+y: Exportar para YAML\n" +
-		"  - ctrl+j: Exportar para JSON\n" +
-		"  - ctrl+x: Exportar para XML\n" +
-		"  - ctrl+l: Exportar para Excel\n" +
-		"  - ctrl+p: Exportar para PDF\n" +
-		"  - ctrl+m: Exportar para Markdown\n" +
-		"  - ctrl+c: Alternar visibilidade das colunas\n"
-
-	toggleHelpText := "\nPressione ctrl+h para exibir/ocultar os atalhos."
-
-	if k.showHelp {
-		return fmt.Sprintf("\nFilter: %s\n\n%s\nPage: %d/%d\n%s%s", k.filter, k.kTb.String(), k.page+1, (len(k.filteredRows)+k.pageSize-1)/k.pageSize, helpText, toggleHelpText)
-	}
-	return fmt.Sprintf("\nFilter: %s\n\n%s\nPage: %d/%d\n%s", k.filter, k.kTb.String(), k.page+1, (len(k.filteredRows)+k.pageSize-1)/k.pageSize, toggleHelpText)
-}
-
+// ExportToCSV exports the table data to a CSV file.
 func (k *TableRenderer) ExportToCSV(filename string) {
 	file, err := os.Create(filename)
 	if err != nil {
-		logz.Error("Error creating file: "+err.Error(), map[string]interface{}{
+		l.Error("Error creating file: "+err.Error(), map[string]interface{}{
 			"context":  "ExportToCSV",
 			"filename": filename,
 		})
@@ -318,7 +400,7 @@ func (k *TableRenderer) ExportToCSV(filename string) {
 
 	// Write headers
 	if writerErr := writer.Write(k.headers); writerErr != nil {
-		logz.Error("Error writing headers to CSV.", map[string]interface{}{
+		l.Error("Error writing headers to CSV.", map[string]interface{}{
 			"context": "ExportToCSV",
 			"headers": k.headers,
 			"error":   writerErr.Error(),
@@ -329,7 +411,7 @@ func (k *TableRenderer) ExportToCSV(filename string) {
 	// Write rows
 	for _, row := range k.filteredRows {
 		if writerRowsErr := writer.Write(row); writerRowsErr != nil {
-			logz.Error("Error writing row to CSV.", map[string]interface{}{
+			l.Error("Error writing row to CSV.", map[string]interface{}{
 				"context": "ExportToCSV",
 				"row":     row,
 				"error":   writerRowsErr.Error(),
@@ -338,16 +420,17 @@ func (k *TableRenderer) ExportToCSV(filename string) {
 		}
 	}
 
-	logz.Info("Data exported to CSV.", map[string]interface{}{
+	l.Info("Data exported to CSV.", map[string]interface{}{
 		"context":  "ExportToCSV",
 		"filename": filename,
 	})
 }
 
+// ExportToYAML exports the table data to a YAML file.
 func (k *TableRenderer) ExportToYAML(filename string) {
 	file, err := os.Create(filename)
 	if err != nil {
-		logz.Error("Error creating file,", map[string]interface{}{
+		l.Error("Error creating file,", map[string]interface{}{
 			"context":  "ExportToYAML",
 			"filename": filename,
 			"error":    err.Error(),
@@ -364,7 +447,7 @@ func (k *TableRenderer) ExportToYAML(filename string) {
 	}(encoder)
 
 	if err := encoder.Encode(data); err != nil {
-		logz.Error("Error writing data to YAML.", map[string]interface{}{
+		l.Error("Error writing data to YAML.", map[string]interface{}{
 			"context": "ExportToYAML",
 			"data":    data,
 			"error":   err.Error(),
@@ -372,16 +455,17 @@ func (k *TableRenderer) ExportToYAML(filename string) {
 		return
 	}
 
-	logz.Info("Data exported to YAML.", map[string]interface{}{
+	l.Info("Data exported to YAML.", map[string]interface{}{
 		"context":  "ExportToYAML",
 		"filename": filename,
 	})
 }
 
+// ExportToJSON exports the table data to a JSON file.
 func (k *TableRenderer) ExportToJSON(filename string) {
 	file, err := os.Create(filename)
 	if err != nil {
-		logz.Error("Error creating file.", map[string]interface{}{
+		l.Error("Error creating file.", map[string]interface{}{
 			"context":  "ExportToJSON",
 			"filename": filename,
 			"error":    err.Error(),
@@ -394,23 +478,24 @@ func (k *TableRenderer) ExportToJSON(filename string) {
 	data := k.GetObjectMap()
 	encoder := json.NewEncoder(file)
 	if err := encoder.Encode(data); err != nil {
-		logz.Error("Error writing data to JSON.", map[string]interface{}{
+		l.Error("Error writing data to JSON.", map[string]interface{}{
 			"context": "ExportToJSON",
 			"data":    data,
 			"error":   err.Error(),
 		})
 		return
 	}
-	logz.Info("Data exported to JSON.", map[string]interface{}{
+	l.Info("Data exported to JSON.", map[string]interface{}{
 		"context":  "ExportToJSON",
 		"filename": filename,
 	})
 }
 
+// ExportToXML exports the table data to an XML file.
 func (k *TableRenderer) ExportToXML(filename string) {
 	file, err := os.Create(filename)
 	if err != nil {
-		logz.Error("Error creating file.", map[string]interface{}{
+		l.Error("Error creating file.", map[string]interface{}{
 			"context":  "ExportToXML",
 			"filename": filename,
 			"error":    err.Error(),
@@ -423,23 +508,25 @@ func (k *TableRenderer) ExportToXML(filename string) {
 	data := k.GetObjectMap()
 	encoder := xml.NewEncoder(file)
 	if err := encoder.Encode(data); err != nil {
-		logz.Error("Error writing data to XML.", map[string]interface{}{
+		l.Error("Error writing data to XML.", map[string]interface{}{
 			"context": "ExportToXML",
 			"data":    data,
 			"error":   err.Error(),
 		})
 		return
 	}
-	logz.Info("Data exported to XML.", map[string]interface{}{
+	l.Info("Data exported to XML.", map[string]interface{}{
 		"context":  "ExportToXML",
 		"filename": filename,
 	})
 }
 
+// ExportToExcel is a placeholder for exporting the table data to an Excel file.
 func (k *TableRenderer) ExportToExcel(filename string) {
 	// Implementation for exporting to Excel
 }
 
+// ExportToPDF exports the table data to a PDF file.
 func (k *TableRenderer) ExportToPDF(filename string) {
 	m := p.NewMaroto(consts.Landscape, consts.Letter)
 	m.SetBorder(true)
@@ -469,17 +556,19 @@ func (k *TableRenderer) ExportToPDF(filename string) {
 	// Save the PDF
 	err := m.OutputFileAndClose(filename)
 	if err != nil {
-		logz.Error("Could not save PDF: "+err.Error(), map[string]interface{}{
+		l.Error("Could not save PDF: "+err.Error(), map[string]interface{}{
 			"context":  "ExportToPDF",
 			"filename": filename,
 		})
 	}
 }
 
+// ExportToMarkdown exports the table data to a Markdown file.
 func (k *TableRenderer) ExportToMarkdown(filename string) {
 	// Implementation for exporting to Markdown
 }
 
+// ToggleColumnVisibility toggles the visibility of the columns in the table.
 func (k *TableRenderer) ToggleColumnVisibility() {
 	for header := range k.visibleCols {
 		k.visibleCols[header] = !k.visibleCols[header]
@@ -487,53 +576,36 @@ func (k *TableRenderer) ToggleColumnVisibility() {
 	k.kTb = k.kTb.Rows(k.GetCurrentPageRows()...)
 }
 
-func (k *TableRenderer) GetHeaders() []string { return k.headers }
+// Execution functions
 
-func (k *TableRenderer) GetRows() [][]string { return k.rows }
-
-func (k *TableRenderer) GetArrayMap() map[string][]string {
-	m := make(map[string][]string)
-	for _, row := range k.rows {
-		m[row[0]] = row[1:]
-	}
-	return m
-}
-
-func (k *TableRenderer) GetHashMap() map[string]string {
-	m := make(map[string]string)
-	for _, row := range k.rows {
-		m[row[0]] = row[1]
-	}
-	return m
-}
-
-func (k *TableRenderer) GetObjectMap() []map[string]string {
-	var m []map[string]string
-	for _, row := range k.rows {
-		m = append(m, map[string]string{row[0]: row[1]})
-	}
-	return m
-}
-
-func (k *TableRenderer) GetByteMap() map[string][]byte {
-	m := make(map[string][]byte)
-	for _, row := range k.rows {
-		m[row[0]] = []byte(row[1])
-	}
-	return m
-}
-
-func GetTableScreen(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) string {
-	k := NewTableRenderer(tbHandler, customStyles)
+// GetTableScreenCustom returns the string representation of the table with custom styles and an optional style function.
+func GetTableScreenCustom(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) string {
+	k := NewTableRenderer(tbHandler, customStyles, styleFunc)
 	return k.View()
 }
 
-func StartTableScreen(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) error {
-	k := NewTableRenderer(tbHandler, customStyles)
+// NavigateAndExecuteTableCustom navigates and executes the table screen with custom styles and an optional style function.
+func NavigateAndExecuteTableCustom(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) error {
+	k := NewTableRenderer(tbHandler, customStyles, styleFunc)
 
-	p := tea.NewProgram(k, tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		logz.Error("Error running table screen: "+err.Error(), map[string]interface{}{
+	prog := tea.NewProgram(k, tea.WithAltScreen())
+	if _, err := prog.Run(); err != nil {
+		l.Error("Error running table screen: "+err.Error(), map[string]interface{}{
+			"context":   "NavigateAndExecuteTable",
+			"tbHandler": tbHandler,
+		})
+		return nil
+	}
+	return nil
+}
+
+// StartTableScreenCustom starts the table screen with custom styles and an optional style function.
+func StartTableScreenCustom(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) error {
+	k := NewTableRenderer(tbHandler, customStyles, styleFunc)
+
+	prog := tea.NewProgram(k, tea.WithAltScreen())
+	if _, err := prog.Run(); err != nil {
+		l.Error("Error running table screen: "+err.Error(), map[string]interface{}{
 			"context":   "StartTableScreen",
 			"tbHandler": tbHandler,
 		})
@@ -542,27 +614,32 @@ func StartTableScreen(tbHandler TableDataHandler, customStyles map[string]lipglo
 	return nil
 }
 
-func StartTableScreenFromRenderer(k *TableRenderer) error {
-	p := tea.NewProgram(k, tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		logz.Error("Error running table screen: "+err.Error(), map[string]interface{}{
-			"context": "StartTableScreenFromRenderer",
-		})
-		return err
-	}
-	return nil
+// GetTableScreen returns the string representation of the table with custom styles.
+func GetTableScreen(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) string {
+	return GetTableScreenCustom(tbHandler, customStyles, nil)
 }
 
+// NavigateAndExecuteTable navigates and executes the table screen with custom styles.
 func NavigateAndExecuteTable(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) error {
-	k := NewTableRenderer(tbHandler, customStyles)
+	return NavigateAndExecuteTableCustom(tbHandler, customStyles, nil)
+}
 
-	p := tea.NewProgram(k, tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		logz.Error("Error running table screen: "+err.Error(), map[string]interface{}{
-			"context":   "NavigateAndExecuteTable",
-			"tbHandler": tbHandler,
+// StartTableScreen starts the table screen with custom styles.
+func StartTableScreen(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) error {
+	return StartTableScreenCustom(tbHandler, customStyles, nil)
+}
+
+// StartTableScreenFromRenderer starts the table screen from a given TableRenderer.
+func StartTableScreenFromRenderer(k *TableRenderer) error {
+	prog := tea.NewProgram(k, tea.WithAltScreen())
+	if _, err := prog.Run(); err != nil {
+		l.Error("Error running table screen: "+err.Error(), map[string]interface{}{
+			"context":  "StartTableScreenFromRenderer",
+			"action":   "StartTableScreenFromRenderer",
+			"model":    k,
+			"showData": true,
 		})
-		return nil
+		return err
 	}
 	return nil
 }

@@ -112,7 +112,7 @@ func tableViewCmd() *cobra.Command {
 			headers := inputData[0]
 			rows := inputData[1:]
 
-			tbC := c.NewTableRenderer(&t.TableHandler{Headers: headers, Rows: rows}, customStyles)
+			tbC := c.NewTableRenderer(&t.TableHandler{Headers: headers, Rows: rows}, customStyles, nil)
 
 			return c.StartTableScreenFromRenderer(tbC)
 		},
@@ -262,7 +262,7 @@ func createTableConfig(commandName string, flags *pflag.FlagSet) *c.TableRendere
 	tableFields = c.NewTableRenderer(&t.TableHandler{
 		Headers: tableHeaders,
 		Rows:    tableRows,
-	}, make(map[string]lipgloss.Color))
+	}, make(map[string]lipgloss.Color), nil)
 
 	return tableFields
 }

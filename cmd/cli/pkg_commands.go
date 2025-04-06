@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 )
 
 // appsCmdsList retorna uma lista de comandos Cobra relacionados a aplicativos.
@@ -121,9 +122,21 @@ func appsCmdList() *cobra.Command {
 			},
 			false,
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			l.Info("Args: "+strings.Join([]string{name, status, method}, " "), nil)
-			return p.ShowInstalledAppsTable(name, status, method)
+		Run: func(cmd *cobra.Command, args []string) {
+			startTime := time.Now()
+			if err := p.ShowInstalledAppsTable(name, status, method); err != nil {
+				l.Error("Error listing installed apps: "+err.Error(), nil)
+			} else {
+				l.Success("Apps listed successfully", nil)
+				if os.Getenv("XTUI_QUIET") == "" || os.Getenv("NON_INTERACTIVE") == "" {
+					timeSpent := time.Since(startTime).Seconds()
+					fmt.Println(fmt.Sprintf("----------------------------------------------------------%s", "\n"))
+					l.Success("Everything was fine and work as expected!", nil)
+					l.Success(fmt.Sprintf("You spent %.2f seconds on running the XTuI module", timeSpent), nil)
+					l.Success("Hope you have enjoyed it! See you soon!!!\n", nil)
+					fmt.Println("----------------------------------------------------------")
+				}
+			}
 		},
 	}
 
