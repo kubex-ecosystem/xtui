@@ -7,6 +7,7 @@ import (
 
 // FormInputObject is the most basic form input object. It will be used globally in all form input objects.
 type FormInputObject[T any] interface {
+	GetName() string
 	GetType() reflect.Type
 	GetValue() T
 	SetValue(val T) error
@@ -16,10 +17,12 @@ type FormInputObject[T any] interface {
 // of the form input object in a serializable. It is used to store the value of the form input object in a
 // serializable and to store metadata for easy and integrated serialization and type conversion.
 type InputObject[T any] struct {
-	Val T `json:"value" yaml:"value" gorm:"column:value"`
-	err error
+	Val  T      `json:"value" yaml:"value" gorm:"column:value"`
+	Name string `json:"name" yaml:"name" gorm:"column:name"`
+	err  error
 }
 
+func (s *InputObject[T]) GetName() string       { return s.Name }
 func (s *InputObject[T]) GetType() reflect.Type { return reflect.TypeOf(s.Val) }
 func (s *InputObject[T]) GetValue() T           { return s.Val }
 func (s *InputObject[T]) SetValue(val T) error {
@@ -38,24 +41,13 @@ type FormInput[T any] interface {
 	FieldDefinition
 	FormInputObject[T]
 
-	// Common Getters
-
 	Placeholder() string
 	MinValue() int
 	MaxValue() int
 	Validation() func(string, func(interface{}) error) error
-
-	// Boolean methods
-
 	IsRequired() bool
 	Error() string
-
-	// Common Setters
-
 	SetPlaceholder(string)
-
-	// Validation methods
-
 	SetRequired(bool)
 	SetMinValue(int)
 	SetMaxValue(int)
@@ -63,9 +55,6 @@ type FormInput[T any] interface {
 	SetValidationRules([]ValidationRule)
 	ValidationRules() []ValidationRule
 	Validate() error
-
-	// Factory methods
-
 	String() string
 	FromString(string) error
 	ToMap() map[string]interface{}
@@ -75,6 +64,8 @@ type FormInput[T any] interface {
 type Input[T any] struct {
 	FieldDefinition
 	FormInputObject[T]
+	Name               string           `json:"name" yaml:"name" gorm:"column:name"`
+	Desc               string           `json:"description" yaml:"description" gorm:"column:description"`
 	Ph                 string           `json:"placeholder" yaml:"placeholder" gorm:"column:placeholder"`
 	Tp                 reflect.Type     `json:"type" yaml:"type" gorm:"column:type"`
 	Val                *T               `json:"value" yaml:"value" gorm:"column:value"`
@@ -85,6 +76,8 @@ type Input[T any] struct {
 	ValidationRulesVal []ValidationRule `json:"validation_rules" yaml:"validation_rules" gorm:"column:validation_rules"`
 }
 
+func (s *Input[T]) Description() string   { return s.Desc }
+func (s *Input[T]) GetName() string       { return s.Name }
 func (s *Input[T]) GetType() reflect.Type { return reflect.TypeOf(s.Val) }
 func (s *Input[T]) GetValue() T {
 	v := reflect.ValueOf(s.Val)
@@ -98,27 +91,17 @@ func (s *Input[T]) SetValue(val T) error {
 		return fmt.Errorf("input is nil")
 	}
 }
-
 func (s *Input[T]) MinValue() int                                           { return s.Min }
 func (s *Input[T]) MaxValue() int                                           { return s.Max }
 func (s *Input[T]) Validation() func(string, func(interface{}) error) error { return nil }
 func (s *Input[T]) Error() string                                           { return s.Err }
 func (s *Input[T]) SetMaxValue(i int)                                       { s.Max = i }
 func (s *Input[T]) Placeholder() string                                     { return s.Ph }
-
-// // Boolean methods
-
-func (s *Input[T]) IsRequired() bool { return s.Req }
-func (s *Input[T]) GetError() string { return s.Err }
-
-// // Common Setters
-
-func (s *Input[T]) SetPlaceholder(ph string) { s.Ph = ph }
-
-// // Validation methods
-
-func (s *Input[T]) SetRequired(req bool) { s.Req = req }
-func (s *Input[T]) SetMinValue(min int)  { s.Min = min }
+func (s *Input[T]) IsRequired() bool                                        { return s.Req }
+func (s *Input[T]) GetError() string                                        { return s.Err }
+func (s *Input[T]) SetPlaceholder(ph string)                                { s.Ph = ph }
+func (s *Input[T]) SetRequired(req bool)                                    { s.Req = req }
+func (s *Input[T]) SetMinValue(min int)                                     { s.Min = min }
 func (s *Input[T]) SetValidation(validation func(string, func(interface{}) error) error) {
 	var valRules = make([]ValidationRule, 0)
 	if s != nil {
@@ -160,9 +143,6 @@ func (s *Input[T]) String() string {
 	}
 	return ""
 }
-
-// // Factory methods
-
 func (s *Input[T]) FromString(str string) error {
 	if s != nil {
 		if s.Val != nil {
@@ -213,4 +193,40 @@ func NewFormInputObjectFromString[T any](str string) FormInputObject[T] {
 func NewFormInputObjectFromBytes[T any](b []byte) FormInputObject[T] {
 	v := reflect.ValueOf(b)
 	return NewInputObject[T](v.Interface().(T))
+}
+
+func NewFormInputList[T any](t []T) []FormInputObject[T] {
+	lfo := make([]FormInputObject[T], 0)
+	for _, v := range t {
+		lfo = append(lfo, NewInputObject(v))
+	}
+	return lfo
+}
+func NewFormInputListFromMap[T any](m []map[string]interface{}) []FormInputObject[T] {
+	lfo := make([]FormInputObject[T], 0)
+	for _, v := range m {
+		lfo = append(lfo, NewInputObject(v["value"].(T)))
+	}
+	return lfo
+}
+func NewFormInputListFromString[T any](str []string) []FormInputObject[T] {
+	lfo := make([]FormInputObject[T], 0)
+	for _, v := range str {
+		lfo = append(lfo, NewInputObject[T](reflect.ValueOf(v).Interface().(T)))
+	}
+	return lfo
+}
+func NewFormInputListFromBytes[T any](b [][]byte) []FormInputObject[T] {
+	lfo := make([]FormInputObject[T], 0)
+	for _, v := range b {
+		lfo = append(lfo, NewInputObject[T](reflect.ValueOf(v).Interface().(T)))
+	}
+	return lfo
+}
+func NewFormInputListFromInterface[T any](i []interface{}) []FormInputObject[T] {
+	lfo := make([]FormInputObject[T], 0)
+	for _, v := range i {
+		lfo = append(lfo, NewInputObject[T](reflect.ValueOf(v).Interface().(T)))
+	}
+	return lfo
 }

@@ -14,6 +14,10 @@ type TableHandler struct {
 	Headers []string
 	Rows    [][]string
 }
+type TableHandlerWithContext struct {
+	TableHandler
+	Context string
+}
 
 func (h *TableHandler) GetHeaders() []string { return h.Headers }
 func (h *TableHandler) GetRows() [][]string  { return h.Rows }
