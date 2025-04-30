@@ -3,7 +3,6 @@ package examples
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	c "github.com/faelmori/xtui/components"
-	t "github.com/faelmori/xtui/types"
 )
 
 type AppModel struct {
@@ -24,7 +23,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+shift+tab":
 			m.currentTable = (m.currentTable - 1 + len(m.tables)) % len(m.tables)
 		case "enter":
-			config := t
+			/*config := t*/
 
 			// Abre um formulário baseado na tabela atual e linha selecionada
 			//if err := c.ShowForm(/*m.tables[m.currentTable].GetSelectedRow()*/); err != nil {

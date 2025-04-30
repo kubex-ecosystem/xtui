@@ -2,6 +2,7 @@ package version
 
 import (
 	l "github.com/faelmori/logz"
+	gl "github.com/faelmori/xtui/logger"
 
 	"github.com/spf13/cobra"
 
@@ -192,8 +193,8 @@ func GetGitModelUrl() string {
 }
 
 func GetVersionInfo() string {
-	l.Info("Version: "+GetVersion(), map[string]interface{}{})
-	l.Info("Git repository: "+GetGitModelUrl(), map[string]interface{}{})
+	gl.Log("info", "Version: "+GetVersion())
+	gl.Log("info", "Git repository: "+GetGitModelUrl())
 	return fmt.Sprintf("Version: %s\nGit repository: %s", GetVersion(), GetGitModelUrl())
 }
 
@@ -206,14 +207,14 @@ func GetLatestVersionFromGit() string {
 
 	response, err := netClient.Get(gitUrlWithoutGit + "/releases/latest")
 	if err != nil {
-		l.Error("ErrorCtx fetching latest version: "+err.Error(), map[string]interface{}{})
-		l.Error("Url: "+gitUrlWithoutGit+"/releases/latest", map[string]interface{}{})
+		gl.Log("error", "ErrorCtx fetching latest version: "+err.Error())
+		gl.Log("error", gitUrlWithoutGit+"/releases/latest")
 		return err.Error()
 	}
 
 	if response.StatusCode != 200 {
-		l.Error("ErrorCtx fetching latest version: "+response.Status, map[string]interface{}{})
-		l.Error("Url: "+gitUrlWithoutGit+"/releases/latest", map[string]interface{}{})
+		gl.Log("error", "ErrorCtx fetching latest version: "+response.Status)
+		gl.Log("error", "Url: "+gitUrlWithoutGit+"/releases/latest")
 		body, _ := io.ReadAll(response.Body)
 		return fmt.Sprintf("ErrorCtx: %s\nResponse: %s", response.Status, string(body))
 	}
@@ -224,16 +225,16 @@ func GetLatestVersionFromGit() string {
 }
 
 func GetLatestVersionInfo() string {
-	l.Info("Latest version: "+GetLatestVersionFromGit(), map[string]interface{}{})
+	gl.Log("info", "Latest version: "+GetLatestVersionFromGit())
 	return "Latest version: " + GetLatestVersionFromGit()
 }
 
 func GetVersionInfoWithLatestAndCheck() string {
 	if GetVersion() == GetLatestVersionFromGit() {
-		l.Info("You are using the latest version.", map[string]interface{}{})
+		gl.Log("info", "You are using the latest version.")
 		return fmt.Sprintf("You are using the latest version.\n%s\n%s", GetVersionInfo(), GetLatestVersionInfo())
 	} else {
-		l.Warn("You are using an outdated version.", map[string]interface{}{})
+		gl.Log("warn", "You are using an outdated version.")
 		return fmt.Sprintf("You are using an outdated version.\n%s\n%s", GetVersionInfo(), GetLatestVersionInfo())
 	}
 }

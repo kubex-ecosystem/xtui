@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	l "github.com/faelmori/logz"
+	gl "github.com/faelmori/xtui/logger"
 	p "github.com/faelmori/xtui/packages"
 	"github.com/spf13/cobra"
 	"os"
@@ -78,7 +78,7 @@ func appsCmdGenInstScript() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			depsList, depsListErr := getDepsList()
 			if depsListErr != nil {
-				l.Error("Error getting dependencies list: "+depsListErr.Error(), nil)
+				gl.Log("error", "Error getting dependencies list: "+depsListErr.Error())
 				return depsListErr
 			}
 			return GenDepsScriptHandler(depsList, args...)
@@ -125,15 +125,15 @@ func appsCmdList() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			startTime := time.Now()
 			if err := p.ShowInstalledAppsTable(name, status, method); err != nil {
-				l.Error("Error listing installed apps: "+err.Error(), nil)
+				gl.Log("error", "Error listing installed apps: "+err.Error())
 			} else {
-				l.Success("Apps listed successfully", nil)
+				gl.Log("success", "Apps listed successfully")
 				if os.Getenv("XTUI_QUIET") == "" || os.Getenv("NON_INTERACTIVE") == "" {
 					timeSpent := time.Since(startTime).Seconds()
 					fmt.Println(fmt.Sprintf("----------------------------------------------------------%s", "\n"))
-					l.Success("Everything was fine and work as expected!", nil)
-					l.Success(fmt.Sprintf("You spent %.2f seconds on running the XTuI module", timeSpent), nil)
-					l.Success("Hope you have enjoyed it! See you soon!!!\n", nil)
+					gl.Log("success", "Everything was fine and work as expected!")
+					gl.Log("success", fmt.Sprintf("You spent %.2f seconds on running the XTuI module", timeSpent))
+					gl.Log("success", "Hope you have enjoyed it! See you soon!!!\n")
 					fmt.Println("----------------------------------------------------------")
 				}
 			}

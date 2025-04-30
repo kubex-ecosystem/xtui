@@ -2,7 +2,7 @@ package components
 
 import (
 	"fmt"
-	"github.com/faelmori/logz"
+	gl "github.com/faelmori/xtui/logger"
 	"reflect"
 	"strings"
 
@@ -235,10 +235,7 @@ func ShowForm(config FormConfig) (map[string]string, error) {
 	initialModel := initialFormModel(newConfig)
 	_, resultModelErr := tea.NewProgram(&initialModel).Run()
 	if resultModelErr != nil {
-		logz.Error("Error running form model.", map[string]interface{}{
-			"context": "ShowForm",
-			"error":   resultModelErr,
-		})
+		gl.Log("error", "Error running form model:"+resultModelErr.Error())
 		return nil, resultModelErr
 	}
 	return inputResult, nil
@@ -276,10 +273,7 @@ func NavigateAndExecuteForm(config FormConfig) (map[string]string, error) {
 	initialModel := initialFormModel(config)
 	_, resultModelErr := tea.NewProgram(&initialModel).Run()
 	if resultModelErr != nil {
-		logz.Error("Error running form model.", map[string]interface{}{
-			"context": "NavigateAndExecuteForm",
-			"error":   resultModelErr,
-		})
+		gl.Log("error", "Error running form model:"+resultModelErr.Error())
 		return nil, resultModelErr
 	}
 	DisplayNotification("Form submitted successfully", "info")
@@ -291,10 +285,7 @@ func ShowFormWithNotification(config FormConfig) (map[string]string, error) {
 	initialModel := initialFormModel(config)
 	_, resultModelErr := tea.NewProgram(&initialModel).Run()
 	if resultModelErr != nil {
-		logz.Error("Error running form model.", map[string]interface{}{
-			"context": "ShowFormWithNotification",
-			"error":   resultModelErr,
-		})
+		gl.Log("error", "Error running form model:"+resultModelErr.Error())
 		return nil, resultModelErr
 	}
 	// Display notification

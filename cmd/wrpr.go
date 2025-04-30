@@ -4,6 +4,7 @@ import (
 	"fmt"
 	l "github.com/faelmori/logz"
 	"github.com/faelmori/xtui/cmd/cli"
+	gl "github.com/faelmori/xtui/logger"
 	"github.com/faelmori/xtui/version"
 	"github.com/spf13/cobra"
 	"os"
@@ -71,7 +72,7 @@ func (m *XTui) concatenateExamples() string {
 func (m *XTui) Command() *cobra.Command {
 	l.GetLogger("XTuI")
 
-	l.Debug(fmt.Sprintf("Creating command for XTuI with flags: %v", os.Args), nil)
+	gl.Log("debug", fmt.Sprintf("Creating command for XTuI with flags: %v", os.Args))
 
 	c := &cobra.Command{
 		Use:         m.Module(),

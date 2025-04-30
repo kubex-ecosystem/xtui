@@ -2,8 +2,8 @@ package cli
 
 import (
 	"fmt"
-	"github.com/faelmori/logz"
 	. "github.com/faelmori/xtui/components"
+	gl "github.com/faelmori/xtui/logger"
 	. "github.com/faelmori/xtui/wrappers"
 	"github.com/spf13/cobra"
 	"strings"
@@ -31,10 +31,7 @@ func InstallApplicationsCommand() *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(depList) == 0 && len(args) == 0 {
-				logz.Error("Empty applications list", map[string]interface{}{
-					"context": "InstallApplicationsCommand",
-					"error":   "no applications to install",
-				})
+				gl.Log("error", "Empty applications list: no applications to install")
 				return fmt.Errorf("no applications to install")
 
 			}

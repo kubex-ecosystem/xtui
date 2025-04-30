@@ -3,8 +3,8 @@ package packages
 import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
-	l "github.com/faelmori/logz"
 	cmp "github.com/faelmori/xtui/components"
+	gl "github.com/faelmori/xtui/logger"
 	t "github.com/faelmori/xtui/types"
 	"os"
 	"os/exec"
@@ -67,7 +67,7 @@ func GenDepsScript(depsList []string, scriptPath string, validationFilePath stri
 	dependencies=(
 	`
 	if len(depsList) == 0 {
-		l.Error("Dependencies list is empty", nil)
+		gl.Log("error", "Dependencies list is empty")
 		return fmt.Errorf("lista de dependências vazia")
 	}
 	for _, dep := range depsList {
@@ -104,7 +104,7 @@ func GenDepsScript(depsList []string, scriptPath string, validationFilePath stri
 	`
 	err := os.WriteFile(scriptPath, []byte(scriptContent), 0755) //nolint:gosec
 	if err != nil {
-		l.Error("Error writing deps script: "+err.Error(), nil)
+		gl.Log("error", "Error writing deps script: "+err.Error())
 		return fmt.Errorf("erro ao escrever o script de dependências")
 	}
 	return nil
@@ -123,7 +123,7 @@ func InstallAppsShell(scriptPath string) error {
 	cmd.Stdin = os.Stdin // Permite interação do usuário
 	err := cmd.Run()
 	if err != nil {
-		l.Error("Error running deps script: "+err.Error(), nil)
+		gl.Log("error", "Error running deps script: "+err.Error())
 		return err
 	}
 	return nil
@@ -156,7 +156,7 @@ func getInstalledAppsHandler(name string, status string, method string) (t.Table
 	cmd := exec.Command("bash", "-c", fmt.Sprintf("dpkg-query -W -f='${Package}\\t${Version}\\t${Status}\\t${Description}\\n'")) //nolint:gosec
 	output, err := cmd.Output()
 	if err != nil {
-		l.Error("Error getting installed apps: "+err.Error(), nil)
+		gl.Log("error", "Error getting installed apps: "+err.Error())
 		return nil, fmt.Errorf("erro ao obter aplicativos instalados")
 	}
 	var apps []AppInfo //nolint:prealloc

@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/faelmori/logz"
+	gl "github.com/faelmori/xtui/logger"
 	"log"
 	"os/exec"
 	"strings"
@@ -129,10 +129,7 @@ type installedPkgMsg string
 
 func downloadAndInstall(dep string, path string, yes bool, quiet bool) tea.Cmd {
 	return func() tea.Msg {
-		logz.Info("Installing application: ", map[string]interface{}{
-			"context": "pkgz",
-			"app":     dep,
-		})
+		gl.Log("info", "Installing application: ")
 		pkg := dep
 		if strings.Contains(dep, "/") {
 			pkg = strings.Split(dep, "/")[1]
@@ -154,17 +151,10 @@ func downloadAndInstall(dep string, path string, yes bool, quiet bool) tea.Cmd {
 		cmd.Stdout = log.Writer()
 		cmd.Stdin = stdin
 		if err := cmd.Run(); err != nil {
-			logz.Error("error installing application.", map[string]interface{}{
-				"context": "pkgz",
-				"app":     dep,
-				"error":   err.Error(),
-			})
+			gl.Log("error", "error installing application: "+err.Error())
 			return tea.Quit()
 		}
-		logz.Info("Application installed.", map[string]interface{}{
-			"context": "pkgz",
-			"app":     dep,
-		})
+		gl.Log("info", "Application installed.")
 		return installedPkgMsg(dep)
 	}
 }
@@ -178,18 +168,12 @@ func appDepsMax(a, b int) int {
 
 func InstallDependenciesWithUI(args ...string) error {
 	if len(args) < 4 {
-		logz.Error("missing arguments", map[string]interface{}{
-			"context": "pkgz",
-			"error":   "missing arguments",
-		})
+		gl.Log("error", "missing arguments")
 		return nil
 	}
 	apps := strings.Split(args[0], " ")
 	if len(apps) == 0 {
-		logz.Error("no applications requested", map[string]interface{}{
-			"context": "pkgz",
-			"error":   "no applications requested",
-		})
+		gl.Log("error", "no applications requested")
 		return nil
 	}
 	path := args[1]
@@ -207,10 +191,7 @@ func InstallDependenciesWithUI(args ...string) error {
 	_, err := p.Run()
 	defer p.Quit()
 	if err != nil {
-		logz.Error("error running dependencies installation.", map[string]interface{}{
-			"context": "pkgz",
-			"error":   err.Error(),
-		})
+		gl.Log("error", "error running dependencies installation: "+err.Error())
 		return nil
 	}
 	return nil
@@ -237,10 +218,7 @@ func NavigateAndExecuteApplication(apps []string, path string, yes bool, quiet b
 	_, err := p.Run()
 	defer p.Quit()
 	if err != nil {
-		logz.Error("error running application navigation and execution.", map[string]interface{}{
-			"context": "NavigateAndExecuteApplication",
-			"error":   err.Error(),
-		})
+		gl.Log("error", "error running application navigation and execution: "+err.Error())
 		return nil
 	}
 	return nil

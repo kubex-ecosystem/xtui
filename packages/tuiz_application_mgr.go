@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/faelmori/logz"
+	gl "github.com/faelmori/xtui/logger"
 	"io"
 	"log"
 	"os"
@@ -172,12 +172,12 @@ func kbxDepsMax(a, b int) int {
 // InstallDepsWithUI installs dependencies in a terminal UI with a progress bar
 func InstallDepsWithUI(args ...string) error {
 	if len(args) < 4 {
-		logz.Error("missing arguments", nil)
+		gl.Log("error", "missing arguments")
 		return nil
 	}
 	apps := strings.Split(args[0], " ")
 	if len(apps) == 0 {
-		logz.Error("no applications requested", nil)
+		gl.Log("error", "no applications requested")
 		return nil
 	}
 	path := args[1]
@@ -188,7 +188,7 @@ func InstallDepsWithUI(args ...string) error {
 	_, err := p.Run()
 	defer p.Quit()
 	if err != nil {
-		logz.Error("error running dependencies installation: "+err.Error(), nil)
+		gl.Log("error", "error running dependencies installation: "+err.Error())
 		return nil
 	}
 	return nil

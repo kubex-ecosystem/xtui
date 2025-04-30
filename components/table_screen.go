@@ -9,7 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
-	l "github.com/faelmori/logz"
+	gl "github.com/faelmori/xtui/logger"
 	. "github.com/faelmori/xtui/types"
 	"github.com/johnfercher/maroto/pkg/consts"
 	p "github.com/johnfercher/maroto/pkg/pdf"
@@ -385,10 +385,7 @@ func (k *TableRenderer) GetCurrentPageRows() [][]string {
 func (k *TableRenderer) ExportToCSV(filename string) {
 	file, err := os.Create(filename)
 	if err != nil {
-		l.Error("Error creating file: "+err.Error(), map[string]interface{}{
-			"context":  "ExportToCSV",
-			"filename": filename,
-		})
+		gl.Log("error", "Error creating file: "+err.Error())
 		return
 	}
 	defer func(file *os.File) {
@@ -400,41 +397,26 @@ func (k *TableRenderer) ExportToCSV(filename string) {
 
 	// Write headers
 	if writerErr := writer.Write(k.headers); writerErr != nil {
-		l.Error("Error writing headers to CSV.", map[string]interface{}{
-			"context": "ExportToCSV",
-			"headers": k.headers,
-			"error":   writerErr.Error(),
-		})
+		gl.Log("error", "Error writing headers to CSV:"+writerErr.Error())
 		return
 	}
 
 	// Write rows
 	for _, row := range k.filteredRows {
 		if writerRowsErr := writer.Write(row); writerRowsErr != nil {
-			l.Error("Error writing row to CSV.", map[string]interface{}{
-				"context": "ExportToCSV",
-				"row":     row,
-				"error":   writerRowsErr.Error(),
-			})
+			gl.Log("error", "Error writing row to CSV: "+writerRowsErr.Error())
 			return
 		}
 	}
 
-	l.Info("Data exported to CSV.", map[string]interface{}{
-		"context":  "ExportToCSV",
-		"filename": filename,
-	})
+	gl.Log("info", "Data exported to CSV:"+filename)
 }
 
 // ExportToYAML exports the table data to a YAML file.
 func (k *TableRenderer) ExportToYAML(filename string) {
 	file, err := os.Create(filename)
 	if err != nil {
-		l.Error("Error creating file,", map[string]interface{}{
-			"context":  "ExportToYAML",
-			"filename": filename,
-			"error":    err.Error(),
-		})
+		gl.Log("error", "Error creating file:"+err.Error())
 		return
 	}
 	defer func(file *os.File) {
@@ -447,29 +429,18 @@ func (k *TableRenderer) ExportToYAML(filename string) {
 	}(encoder)
 
 	if err := encoder.Encode(data); err != nil {
-		l.Error("Error writing data to YAML.", map[string]interface{}{
-			"context": "ExportToYAML",
-			"data":    data,
-			"error":   err.Error(),
-		})
+		gl.Log("error", "Error writing data to YAML:"+err.Error())
 		return
 	}
 
-	l.Info("Data exported to YAML.", map[string]interface{}{
-		"context":  "ExportToYAML",
-		"filename": filename,
-	})
+	gl.Log("info", "Data exported to YAML:"+filename)
 }
 
 // ExportToJSON exports the table data to a JSON file.
 func (k *TableRenderer) ExportToJSON(filename string) {
 	file, err := os.Create(filename)
 	if err != nil {
-		l.Error("Error creating file.", map[string]interface{}{
-			"context":  "ExportToJSON",
-			"filename": filename,
-			"error":    err.Error(),
-		})
+		gl.Log("error", "Error creating file:"+err.Error())
 		return
 	}
 	defer func(file *os.File) {
@@ -478,28 +449,17 @@ func (k *TableRenderer) ExportToJSON(filename string) {
 	data := k.GetObjectMap()
 	encoder := json.NewEncoder(file)
 	if err := encoder.Encode(data); err != nil {
-		l.Error("Error writing data to JSON.", map[string]interface{}{
-			"context": "ExportToJSON",
-			"data":    data,
-			"error":   err.Error(),
-		})
+		gl.Log("error", "Error writing data to JSON:"+err.Error())
 		return
 	}
-	l.Info("Data exported to JSON.", map[string]interface{}{
-		"context":  "ExportToJSON",
-		"filename": filename,
-	})
+	gl.Log("info", "Data exported to JSON:"+filename)
 }
 
 // ExportToXML exports the table data to an XML file.
 func (k *TableRenderer) ExportToXML(filename string) {
 	file, err := os.Create(filename)
 	if err != nil {
-		l.Error("Error creating file.", map[string]interface{}{
-			"context":  "ExportToXML",
-			"filename": filename,
-			"error":    err.Error(),
-		})
+		gl.Log("error", "Error creating file:"+err.Error())
 		return
 	}
 	defer func(file *os.File) {
@@ -508,17 +468,10 @@ func (k *TableRenderer) ExportToXML(filename string) {
 	data := k.GetObjectMap()
 	encoder := xml.NewEncoder(file)
 	if err := encoder.Encode(data); err != nil {
-		l.Error("Error writing data to XML.", map[string]interface{}{
-			"context": "ExportToXML",
-			"data":    data,
-			"error":   err.Error(),
-		})
+		gl.Log("error", "Error writing data to XML:"+err.Error())
 		return
 	}
-	l.Info("Data exported to XML.", map[string]interface{}{
-		"context":  "ExportToXML",
-		"filename": filename,
-	})
+	gl.Log("info", "Data exported to XML:"+filename)
 }
 
 // ExportToExcel is a placeholder for exporting the table data to an Excel file.
@@ -556,10 +509,7 @@ func (k *TableRenderer) ExportToPDF(filename string) {
 	// Save the PDF
 	err := m.OutputFileAndClose(filename)
 	if err != nil {
-		l.Error("Could not save PDF: "+err.Error(), map[string]interface{}{
-			"context":  "ExportToPDF",
-			"filename": filename,
-		})
+		gl.Log("error", "Could not save PDF: "+err.Error())
 	}
 }
 
@@ -590,10 +540,7 @@ func NavigateAndExecuteTableCustom(tbHandler TableDataHandler, customStyles map[
 
 	prog := tea.NewProgram(k, tea.WithAltScreen())
 	if _, err := prog.Run(); err != nil {
-		l.Error("Error running table screen: "+err.Error(), map[string]interface{}{
-			"context":   "NavigateAndExecuteTable",
-			"tbHandler": tbHandler,
-		})
+		gl.Log("error", "Error running table screen: "+err.Error())
 		return nil
 	}
 	return nil
@@ -605,10 +552,7 @@ func StartTableScreenCustom(tbHandler TableDataHandler, customStyles map[string]
 
 	prog := tea.NewProgram(k, tea.WithAltScreen())
 	if _, err := prog.Run(); err != nil {
-		l.Error("Error running table screen: "+err.Error(), map[string]interface{}{
-			"context":   "StartTableScreen",
-			"tbHandler": tbHandler,
-		})
+		gl.Log("error", "Error running table screen: "+err.Error())
 		return nil
 	}
 	return nil
@@ -633,12 +577,7 @@ func StartTableScreen(tbHandler TableDataHandler, customStyles map[string]lipglo
 func StartTableScreenFromRenderer(k *TableRenderer) error {
 	prog := tea.NewProgram(k, tea.WithAltScreen())
 	if _, err := prog.Run(); err != nil {
-		l.Error("Error running table screen: "+err.Error(), map[string]interface{}{
-			"context":  "StartTableScreenFromRenderer",
-			"action":   "StartTableScreenFromRenderer",
-			"model":    k,
-			"showData": true,
-		})
+		gl.Log("error", "Error running table screen: "+err.Error())
 		return err
 	}
 	return nil
