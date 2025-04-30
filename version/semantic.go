@@ -66,7 +66,7 @@ func getLatestTag(repoURL string) (string, error) {
 }
 
 func (v *ServiceImpl) updateLatestVersion() error {
-	repoURL := "https://api.github.com/repos/faelmori/spidergo"
+	repoURL := strings.TrimSuffix(v.gitModelUrl, ".git")
 	tag, err := getLatestTag(repoURL)
 	if err != nil {
 		return err
