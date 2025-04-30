@@ -6,13 +6,11 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
 	l "github.com/faelmori/logz"
 	c "github.com/faelmori/xtui/components"
 	t "github.com/faelmori/xtui/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"gopkg.in/yaml.v2"
 	"io"
 	"os"
 	"strings"
@@ -239,7 +237,7 @@ func NavigateAndExecuteViewCommand(cmd *cobra.Command, args []string) error {
 	flags.VisitAll(func(flag *pflag.Flag) {
 		if value, ok := tableValues[flag.Name]; ok {
 			if err := flag.Value.Set(value); err != nil {
-				l.FatalC(err.Error(), nil)
+				l.Fatal(err.Error(), nil)
 				return
 			}
 		}

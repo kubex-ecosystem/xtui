@@ -4,9 +4,41 @@ import (
 	"fmt"
 	t "github.com/faelmori/xtui/types"
 	"github.com/spf13/pflag"
+	"math/rand"
 	"os"
 	"reflect"
 	"strings"
+)
+
+var (
+	banners = []string{`
+	 ___    ___  _________   ___  ___   ___     
+	|\  \  /  /||\___   ___\|\  \|\  \ |\  \    
+	\ \  \/  / /\|___ \  \_|\ \  \\\  \\ \  \   
+	 \ \    / /      \ \  \  \ \  \\\  \\ \  \  
+	  /     \/        \ \  \  \ \  \\\  \\ \  \ 
+	 /  /\   \         \ \__\  \ \_______\\ \__\
+	/__/ /\ __\         \|__|   \|_______| \|__|
+	|__|/ \|__|                                 
+`, `
+	 ___    ___    ██████████   ██     ██	 ██
+	|\  \  /  /|  ░░░░░██░░░   ░██    ░██	░██
+	\ \  \/  / /      ░██      ░██    ░██	░██
+	 \ \    / /       ░██      ░██    ░██	░██
+	  /     \/        ░██      ░██    ░██	░██
+	 /  /\   \        ░██      ░██    ░██	░██
+	/__/ /\ __\       ░██      ░░███████ 	░██
+	|__|/ \|__|       ░░       ░░░░░░░  	░░
+`, `
+	 ██     ██   ██████████   ██     ██	 ██
+	░░██   ██   ░░░░░██░░░   ░██    ░██	░██
+	 ░░██ ██        ░██      ░██    ░██	░██
+	  ░░███         ░██      ░██    ░██	░██
+	   ██░██        ░██      ░██    ░██	░██
+	  ██ ░░██       ░██      ░██    ░██	░██
+	 ██   ░░██      ░██      ░░███████ 	░██
+	░░     ░░       ░░       ░░░░░░░  	░░
+`}
 )
 
 func GetDescriptions(descriptionArg []string, _ bool) map[string]string {
@@ -20,17 +52,9 @@ func GetDescriptions(descriptionArg []string, _ bool) map[string]string {
 	} else {
 		description = ""
 	}
-
-	banner = `
- ___    ___  _________   ___  ___   ___     
-|\  \  /  /||\___   ___\|\  \|\  \ |\  \    
-\ \  \/  / /\|___ \  \_|\ \  \\\  \\ \  \   
- \ \    / /      \ \  \  \ \  \\\  \\ \  \  
-  /     \/        \ \  \  \ \  \\\  \\ \  \ 
- /  /\   \         \ \__\  \ \_______\\ \__\
-/__/ /\ __\         \|__|   \|_______| \|__|
-|__|/ \|__|                                 
-`
+	bannerRandLen := len(banners)
+	bannerRandIndex := rand.Intn(bannerRandLen)
+	banner = banners[bannerRandIndex]
 	return map[string]string{"banner": banner, "description": description}
 }
 

@@ -69,7 +69,9 @@ func (m *XTui) concatenateExamples() string {
 
 // Command retorna o comando cobra para o módulo.
 func (m *XTui) Command() *cobra.Command {
-	l.GetLogger("XTuI").Debug(fmt.Sprintf("Creating command for XTuI with flags: %v", os.Args), nil)
+	l.GetLogger("XTuI")
+
+	l.Debug(fmt.Sprintf("Creating command for XTuI with flags: %v", os.Args), nil)
 
 	c := &cobra.Command{
 		Use:         m.Module(),

@@ -5,45 +5,37 @@ import (
 	t "github.com/faelmori/xtui/types"
 )
 
-type Config struct{ t.Config }
+type Config struct{ t.FormConfig }
 type FormFields = t.FormFields
-type FormField = t.FormField
-type InputField = *t.InputField
+type FormField[T any] struct {
+	*t.InputObject[t.FormInputObject[T]]
+}
+type InputField[T any] struct{ *t.InputObject[T] }
 
 func LogViewer(args ...string) error {
-	return t.LogViewer(args...)
+	return c.StartTableScreen(nil, nil)
 }
 func ShowForm(form Config) (map[string]string, error) {
-	return c.ShowForm(form.Config)
+	return c.ShowForm(form.FormConfig)
 }
 
 func NewConfig(title string, fields FormFields) Config {
-	return Config{Config: t.Config{Title: title, Fields: fields}}
+	return Config{FormConfig: t.NewFormConfig(title, fields.Inputs())}
 }
-func NewInputField(placeholder string, typ string, value string, required bool, minValue int, maxValue int, err string, validation func(string) error) *FormField {
-	return &InputField{
-		t.InputField{
-			Ph:  placeholder,
-			Tp:  typ,
-			Val: value,
-			Req: required,
-			Min: minValue,
-			Max: maxValue,
-			Err: err,
-			Vld: validation,
-		},
+func NewInputField[T any](placeholder string, typ string, value T, required bool, minValue int, maxValue int, err string, validation func(string) error) *FormField[T] {
+	input := t.NewInputObject[t.FormInputObject[T]](t.NewFormInputObject[T](value))
+	return &FormField[T]{
+		input,
 	}
 }
-func NewFormFields(title string, fields []FormField) FormFields {
-	ffs := make([]t.FormField, len(fields))
+func NewFormFields[T any](title string, fields []*FormField[t.FormInputObject[T]]) FormFields {
+	ffs := make([]t.FormInputObject[any], 0)
 	for i, f := range fields {
-		ffs[i] = f.FormField
+		ffs[i] = t.NewFormInputObject[any](f.GetValue())
 	}
 	return FormFields{
-		t.FormFields{
-			Title:  title,
-			Fields: ffs,
-		},
+		Title:  title,
+		Fields: ffs,
 	}
 }
-func NewFormModel(config t.Config) (map[string]string, error) { return c.ShowForm(config) }
+func NewFormModel(config Config) (map[string]string, error) { return c.ShowForm(config.FormConfig) }
