@@ -72,9 +72,12 @@ func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipglo
 			if rowIndex < 0 || rowIndex >= len(rows) {
 				return baseStyle
 			}
-
-			if rows[rowIndex][1] == "Bug" {
-				return selectedStyle
+			if rows != nil && len(rows) < rowIndex {
+				if rows[rowIndex] != nil && len(rows[rowIndex]) > 1 {
+					if rows[rowIndex][1] == "Bug" {
+						return selectedStyle
+					}
+				}
 			}
 
 			switch col {
@@ -115,14 +118,29 @@ func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipglo
 			if row == 0 {
 				return headerStyle
 			}
-			rowIndex := row - 1
-			if rowIndex < 0 || rowIndex >= len(rows) {
-				return baseStyle
-			}
-			if rows[rowIndex][1] == "Bug" {
+			if row == 1 {
 				return selectedStyle
 			}
+			rowIndex := row - 1
+			if rowIndex < 0 || len(rows) <= rowIndex {
+				return baseStyle
+			}
+			if rows != nil && rowIndex < len(rows) {
+				if rows[rowIndex] != nil &&
+					len(rows[rowIndex]) > 1 &&
+					len(rows[rowIndex]) > col &&
+					len(rows[rowIndex]) > 1 {
+					if rows[rowIndex][1] == "Bug" {
+						return selectedStyle
+					}
+				}
+			}
+			if col >= len(rows[rowIndex]) {
+				return baseStyle
+			}
+
 			return styleFunc(row, col, rows[row][col])
+			//return styleFunc(row, col, rows[rowIndex][col])
 		}).
 		Border(lipgloss.ThickBorder())
 
