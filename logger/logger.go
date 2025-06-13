@@ -2,10 +2,11 @@ package logger
 
 import (
 	"fmt"
-	l "github.com/faelmori/logz"
 	"reflect"
 	"runtime"
 	"strings"
+
+	l "github.com/rafa-mori/logz"
 )
 
 type gLog struct {
@@ -18,7 +19,7 @@ var (
 	debug bool
 	// g is the global logger instance.
 	g *gLog = &gLog{
-		Logger:    l.GetLogger("GoBeMin - Test"),
+		Logger:    l.GetLogger("GoBE - Test"),
 		gLogLevel: LogTypeInfo,
 	}
 )
@@ -29,7 +30,7 @@ func init() {
 	// Initialize the global logger instance with a default logger.
 	if g.Logger == nil {
 		g = &gLog{
-			Logger:    l.GetLogger("GoBeMin - Test"),
+			Logger:    l.GetLogger("GoBE - Test"),
 			gLogLevel: LogTypeInfo,
 		}
 	}
@@ -115,12 +116,12 @@ func LogObjLogger[T any](obj *T, logType string, messages ...string) {
 			lgr.ErrorCtx(fmt.Sprintf("logType (%s) is not valid", logType), ctxMessageMap)
 		}
 	} else {
-		lgr.InfoCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.InfoCtx(fullMessage, ctxMessageMap)
 	}
 }
 
 // Log is a function that logs messages with the specified log type and caller information.
-func Log(logType string, messages ...string) {
+func Log(logType string, messages ...any) {
 	pc, file, line, ok := runtime.Caller(1)
 	if !ok {
 		g.ErrorCtx("Log: unable to get caller information", nil)
@@ -133,7 +134,10 @@ func Log(logType string, messages ...string) {
 		"line":     line,
 		"showData": debug,
 	}
-	fullMessage := strings.Join(messages, " ")
+	fullMessage := ""
+	if len(messages) > 0 {
+		fullMessage = fmt.Sprintf("%v", messages[0:])
+	}
 	logType = strings.ToLower(logType)
 	if logType != "" {
 		if reflect.TypeOf(logType).ConvertibleTo(reflect.TypeFor[LogType]()) {
@@ -144,7 +148,7 @@ func Log(logType string, messages ...string) {
 			g.ErrorCtx(fmt.Sprintf("logType (%s) is not valid", logType), ctxMessageMap)
 		}
 	} else {
-		g.InfoCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		g.InfoCtx(fullMessage, ctxMessageMap)
 	}
 }
 
@@ -162,23 +166,23 @@ func logging(lgr l.Logger, lType LogType, fullMessage string, ctxMessageMap map[
 	ctxMessageMap["showData"] = debugCtx
 	switch lType {
 	case LogTypeInfo:
-		lgr.InfoCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.InfoCtx(fullMessage, ctxMessageMap)
 	case LogTypeDebug:
-		lgr.DebugCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.DebugCtx(fullMessage, ctxMessageMap)
 	case LogTypeError:
-		lgr.ErrorCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.ErrorCtx(fullMessage, ctxMessageMap)
 	case LogTypeWarn:
-		lgr.WarnCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.WarnCtx(fullMessage, ctxMessageMap)
 	case LogTypeNotice:
-		lgr.NoticeCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.NoticeCtx(fullMessage, ctxMessageMap)
 	case LogTypeSuccess:
-		lgr.SuccessCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.SuccessCtx(fullMessage, ctxMessageMap)
 	case LogTypeFatal:
-		lgr.FatalCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.FatalCtx(fullMessage, ctxMessageMap)
 	case LogTypePanic:
-		lgr.FatalCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.FatalCtx(fullMessage, ctxMessageMap)
 	default:
-		lgr.InfoCtx(fmt.Sprintf("%s", fullMessage), ctxMessageMap)
+		lgr.InfoCtx(fullMessage, ctxMessageMap)
 	}
 	debugCtx = debug
 }
