@@ -3,13 +3,14 @@ package wrappers
 import (
 	"bufio"
 	"fmt"
-	gl "github.com/faelmori/xtui/logger"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	gl "github.com/rafa-mori/xtui/logger"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

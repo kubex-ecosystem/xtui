@@ -2,12 +2,13 @@ package cli
 
 import (
 	"fmt"
-	t "github.com/faelmori/xtui/types"
-	"github.com/spf13/pflag"
 	"math/rand"
 	"os"
 	"reflect"
 	"strings"
+
+	t "github.com/rafa-mori/xtui/types"
+	"github.com/spf13/pflag"
 )
 
 var (

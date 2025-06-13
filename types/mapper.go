@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	gl "github.com/faelmori/xtui/logger"
-	"github.com/pelletier/go-toml/v2"
-	"github.com/subosito/gotenv"
-	"gopkg.in/yaml.v3"
 	"os"
 	"reflect"
 	"strings"
+
+	"github.com/pelletier/go-toml/v2"
+	gl "github.com/rafa-mori/xtui/logger"
+	"github.com/subosito/gotenv"
+	"gopkg.in/yaml.v3"
 )
 
 // IMapper is a generic interface for serializing and deserializing objects of type T.

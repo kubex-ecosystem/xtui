@@ -2,11 +2,6 @@ package packages
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/progress"
-	"github.com/charmbracelet/bubbles/spinner"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	gl "github.com/faelmori/xtui/logger"
 	"io"
 	"log"
 	"os"
@@ -14,6 +9,12 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/spinner"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	gl "github.com/rafa-mori/xtui/logger"
 )
 
 type KbxDepsModel struct {

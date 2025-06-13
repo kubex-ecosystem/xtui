@@ -2,13 +2,14 @@ package cli
 
 import (
 	"fmt"
-	gl "github.com/faelmori/xtui/logger"
-	p "github.com/faelmori/xtui/packages"
-	"github.com/spf13/cobra"
 	"os"
 	"reflect"
 	"strings"
 	"time"
+
+	gl "github.com/rafa-mori/xtui/logger"
+	p "github.com/rafa-mori/xtui/packages"
+	"github.com/spf13/cobra"
 )
 
 // appsCmdsList retorna uma lista de comandos Cobra relacionados a aplicativos.

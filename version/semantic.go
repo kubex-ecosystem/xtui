@@ -2,7 +2,7 @@ package version
 
 import (
 	l "github.com/faelmori/logz"
-	gl "github.com/faelmori/xtui/logger"
+	gl "github.com/rafa-mori/xtui/logger"
 
 	"github.com/spf13/cobra"
 

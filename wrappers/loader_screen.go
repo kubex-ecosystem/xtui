@@ -1,11 +1,12 @@
 package wrappers
 
 import (
+	"strings"
+
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/faelmori/xtui/types"
-	"strings"
+	"github.com/rafa-mori/xtui/types"
 )
 
 var (

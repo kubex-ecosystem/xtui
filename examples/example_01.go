@@ -2,7 +2,7 @@ package examples
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
-	c "github.com/faelmori/xtui/components"
+	c "github.com/rafa-mori/xtui/components"
 )
 
 type AppModel struct {
