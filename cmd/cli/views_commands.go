@@ -3,7 +3,6 @@ package cli
 import (
 	"bytes"
 	"encoding/csv"
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
@@ -72,10 +71,12 @@ func tableViewCmd() *cobra.Command {
 					if err != nil {
 						return err
 					}
-					inputData, inputDataErr = parseJSON(data)
-					if inputDataErr != nil {
-						return inputDataErr
+					mapper := t.NewMapperTypeWithObject[[][]string](&inputData, "/tmp")
+					resB, err := mapper.Deserialize(data, "json")
+					if err != nil {
+						return err
 					}
+					inputData = resB
 				} else if xmlFile != "" {
 					data, err := os.ReadFile(xmlFile)
 					if err != nil {
@@ -139,19 +140,6 @@ func parseCSV(data []byte, delimiter, quote, comment string) ([][]string, error)
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, err
-	}
-	return records, nil
-}
-
-func parseJSON(data []byte) ([][]string, error) {
-	var result map[string]string
-	err := json.Unmarshal(data, &result)
-	if err != nil {
-		return nil, err
-	}
-	var records [][]string
-	for key, value := range result {
-		records = append(records, []string{key, value})
 	}
 	return records, nil
 }
