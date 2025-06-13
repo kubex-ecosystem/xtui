@@ -13,7 +13,7 @@ This package provides a `TableRenderer` for rendering tables in the terminal wit
 - `github.com/charmbracelet/lipgloss`: For styling terminal output.
 - `github.com/charmbracelet/lipgloss/table`: For creating tables.
 - `l "github.com/faelmori/logz"`: For logging.
-- `. "github.com/faelmori/xtui/types"`: For custom types.
+- `. "github.com/rafa-mori/xtui/types"`: For custom types.
 - `github.com/johnfercher/maroto/pkg/consts`, `p "github.com/johnfercher/maroto/pkg/pdf"`, `props "github.com/johnfercher/maroto/pkg/props"`: For PDF generation.
 - `gopkg.in/yaml.v2`: For YAML parsing.
 - `os`, `sort`, `strconv`, `strings`: Standard library packages.

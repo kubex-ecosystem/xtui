@@ -2,13 +2,14 @@ package packages
 
 import (
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
-	cmp "github.com/faelmori/xtui/components"
-	gl "github.com/faelmori/xtui/logger"
-	t "github.com/faelmori/xtui/types"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
+	cmp "github.com/rafa-mori/xtui/components"
+	gl "github.com/rafa-mori/xtui/logger"
+	t "github.com/rafa-mori/xtui/types"
 )
 
 // AppInfo show information about an installed application.

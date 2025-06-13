@@ -1,12 +1,13 @@
 package cli
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/faelmori/xtui/components"
-	"github.com/faelmori/xtui/wrappers"
-	"github.com/spf13/cobra"
 	"testing"
 	"time"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rafa-mori/xtui/components"
+	"github.com/rafa-mori/xtui/wrappers"
+	"github.com/spf13/cobra"
 )
 
 func FormsCmdsList() []*cobra.Command {

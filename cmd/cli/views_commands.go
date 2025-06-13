@@ -5,17 +5,18 @@ import (
 	"encoding/csv"
 	"encoding/xml"
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
-	c "github.com/faelmori/xtui/components"
-	gl "github.com/faelmori/xtui/logger"
-	t "github.com/faelmori/xtui/types"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/charmbracelet/lipgloss"
+	c "github.com/rafa-mori/xtui/components"
+	gl "github.com/rafa-mori/xtui/logger"
+	t "github.com/rafa-mori/xtui/types"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"gopkg.in/yaml.v3"
 )
 
 func ViewsCmdsList() []*cobra.Command {

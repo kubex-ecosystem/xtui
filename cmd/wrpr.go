@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	l "github.com/faelmori/logz"
-	"github.com/faelmori/xtui/cmd/cli"
-	gl "github.com/faelmori/xtui/logger"
-	"github.com/faelmori/xtui/version"
-	"github.com/spf13/cobra"
 	"os"
 	"strings"
+
+	l "github.com/faelmori/logz"
+	"github.com/rafa-mori/xtui/cmd/cli"
+	gl "github.com/rafa-mori/xtui/logger"
+	"github.com/rafa-mori/xtui/version"
+	"github.com/spf13/cobra"
 )
 
 // XTui representa a estrutura do módulo ui.

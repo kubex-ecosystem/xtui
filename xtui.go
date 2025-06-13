@@ -1,8 +1,8 @@
 package xtui
 
 import (
-	c "github.com/faelmori/xtui/components"
-	t "github.com/faelmori/xtui/types"
+	c "github.com/rafa-mori/xtui/components"
+	t "github.com/rafa-mori/xtui/types"
 )
 
 type Config struct{ t.FormConfig }

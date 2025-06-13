@@ -2,15 +2,16 @@ package components
 
 import (
 	"fmt"
-	gl "github.com/faelmori/xtui/logger"
 	"reflect"
 	"strings"
+
+	gl "github.com/rafa-mori/xtui/logger"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	. "github.com/faelmori/xtui/types"
+	. "github.com/rafa-mori/xtui/types"
 )
 
 var (
