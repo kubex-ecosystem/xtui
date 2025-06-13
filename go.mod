@@ -1,17 +1,18 @@
 module github.com/faelmori/xtui
 
-go 1.24.2
+go 1.24.4
 
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/faelmori/logz v1.2.0
+	github.com/faelmori/logz v1.2.1
 	github.com/fatih/color v1.18.0
 	github.com/johnfercher/maroto v1.0.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/pelletier/go-toml/v2 v2.2.4
+	github.com/rafa-mori/logz v1.3.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/subosito/gotenv v1.6.0
