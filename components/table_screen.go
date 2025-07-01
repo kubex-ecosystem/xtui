@@ -484,10 +484,16 @@ func (k *TableRenderer) ExportToXML(filename string) {
 	defer func(file *os.File) {
 		_ = file.Close()
 	}(file)
-	data := k.GetObjectMap()
 	encoder := xml.NewEncoder(file)
-	if err := encoder.Encode(data); err != nil {
-		gl.Log("error", "Error writing data to XML:"+err.Error())
+	encoder.Indent("", "  ") // Indent for better readability
+	vstr := xml.StartElement{Name: xml.Name{Local: "table"}}
+	defer func(encoder *xml.Encoder) {
+		if err := encoder.EncodeToken(xml.EndElement{Name: vstr.Name}); err != nil {
+			gl.Log("error", "Error writing end token to XML:"+err.Error())
+		}
+	}(encoder)
+	if err := encoder.EncodeToken(vstr); err != nil {
+		gl.Log("error", "Error writing start token to XML:"+err.Error())
 		return
 	}
 	gl.Log("info", "Data exported to XML:"+filename)

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	l "github.com/faelmori/logz"
+	l "github.com/rafa-mori/logz"
 	"github.com/rafa-mori/xtui/cmd/cli"
 	gl "github.com/rafa-mori/xtui/logger"
 	"github.com/rafa-mori/xtui/version"
