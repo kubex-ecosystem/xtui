@@ -1,16 +1,12 @@
-[//]: # (![XTui Banner]&#40;./assets/banner.png&#41;)
-
-# XTui
-
----
+![XTui Banner](docs/assets/top_banner.png)
 
 **A high-performance, easy-to-use terminal user interface (TUI) library for Go, enabling developers to build interactive and visually appealing terminal applications with minimal effort.**
 
 ---
 
-![Go Version](https://img.shields.io/github/go-mod/go-version/faelmori/xtui)
-![License](https://img.shields.io/github/license/faelmori/xtui)
-![Build Status](https://img.shields.io/github/actions/workflow/status/faelmori/xtui/build.yml)
+![Go Version](https://img.shields.io/github/go-mod/go-version/rafa-mori/xtui)
+![License](https://img.shields.io/github/license/rafa-mori/xtui)
+![Build Status](https://img.shields.io/github/actions/workflow/status/rafa-mori/xtui/release.yml)
 
 ## Table of Contents
 
