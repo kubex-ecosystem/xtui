@@ -9,6 +9,39 @@ type TableDataHandler interface {
 	GetByteMap() map[string][]byte
 }
 
+func NewTableHandler(headers []string, rows [][]string) TableDataHandler {
+	return &TableHandler{
+		Headers: headers,
+		Rows:    rows,
+	}
+}
+
+func NewTableHandlerFromRows(headers []string, rows [][]string) TableDataHandler {
+	if len(headers) == 0 {
+		headers = make([]string, len(rows[0]))
+		for i := range headers {
+			headers[i] = "Column " + string(i+1)
+		}
+	}
+	return &TableHandler{
+		Headers: headers,
+		Rows:    rows,
+	}
+}
+
+func NewTableHandlerFromMap(data map[string][]string) TableDataHandler {
+	headers := make([]string, 0, len(data))
+	rows := make([][]string, 0, len(data))
+	for key, values := range data {
+		headers = append(headers, key)
+		rows = append(rows, append([]string{key}, values...))
+	}
+	return &TableHandler{
+		Headers: headers,
+		Rows:    rows,
+	}
+}
+
 type TableHandler struct {
 	TableDataHandler
 	Headers []string

@@ -19,7 +19,7 @@ import (
 const moduleAlias = "XTuI"
 const moduleName = "xtui"
 const gitModelUrl = "https://github.com/rafa-mori/" + moduleName + ".git"
-const currentVersionFallback = "v1.3.0" // First version with the version file
+const currentVersionFallback = "v1.3.1" // First version with the version file
 
 type Service interface {
 	GetLatestVersion() (string, error)
