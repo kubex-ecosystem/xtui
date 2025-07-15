@@ -1,4 +1,4 @@
-package examples
+package main
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
@@ -8,6 +8,10 @@ import (
 type AppModel struct {
 	tables       []*c.TableRenderer
 	currentTable int
+}
+
+func main() {
+  //appm :=  AppModel(make(c.TableRenderer, 0),  0)
 }
 
 func (m *AppModel) Init() tea.Cmd {

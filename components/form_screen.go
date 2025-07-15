@@ -42,9 +42,7 @@ func initialFormModel(config FormConfig) FormModel {
 	cfg := &config
 	var inputs []FormInputObject[any]
 
-	for _, field := range cfg.Fields {
-		inputs = append(inputs, field)
-	}
+	inputs = append(inputs, cfg.Fields...)
 
 	availableProperties := getAvailableProperties()
 	if len(availableProperties) > 0 {

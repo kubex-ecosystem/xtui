@@ -1,3 +1,6 @@
+// Package components provides a TableRenderer that renders tables in the terminal with customizable styles and dynamic behavior.
+// It supports various features like filtering, sorting, pagination, and exporting to different formats.
+// It also includes functions to navigate and execute forms with notifications.
 package components
 
 import (
