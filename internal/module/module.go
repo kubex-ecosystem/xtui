@@ -1,23 +1,23 @@
-package main
+// Package module provides internal types and functions for the Grompt application.
+package module
 
 import (
 	"fmt"
+
+	"github.com/kubex-ecosystem/xtui/cmd/cli"
+	gl "github.com/kubex-ecosystem/xtui/internal/module/logger"
+	"github.com/kubex-ecosystem/xtui/internal/module/version"
+	"github.com/spf13/cobra"
+
+	l "github.com/kubex-ecosystem/logz"
+
 	"os"
 	"strings"
-
-	l "github.com/rafa-mori/logz"
-	"github.com/rafa-mori/xtui/cmd/cli"
-	gl "github.com/rafa-mori/xtui/logger"
-	"github.com/rafa-mori/xtui/version"
-	"github.com/spf13/cobra"
 )
 
 // XTui representa a estrutura do módulo ui.
-type XTui struct{}
-
-// RegX registra e retorna uma nova instância de XTui.
-func RegX() *XTui {
-	return &XTui{}
+type XTui struct {
+	HideBanner bool
 }
 
 // Alias retorna o alias do módulo ui.

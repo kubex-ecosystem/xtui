@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"strings"
 
-	t "github.com/rafa-mori/xtui/types"
+	t "github.com/kubex-ecosystem/xtui/types"
 	"github.com/spf13/pflag"
 )
 

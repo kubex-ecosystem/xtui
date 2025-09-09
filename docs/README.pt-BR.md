@@ -52,7 +52,7 @@ de terminal interativas e visualmente atraentes com o mínimo de esforço, mante
 Para instalar o **xtui**, execute o comando:
 
 ```sh
-go get github.com/rafa-mori/xtui
+go get github.com/kubex-ecosystem/xtui
 ```
 
 ## Uso
@@ -63,8 +63,8 @@ Aqui está um exemplo rápido demonstrando como usar o **xtui** para exibir tabe
 package main
 
 import (
-    "github.com/rafa-mori/xtui"
-    "github.com/rafa-mori/xtui/types"
+    "github.com/kubex-ecosystem/xtui"
+    "github.com/kubex-ecosystem/xtui/types"
     "github.com/charmbracelet/lipgloss"
 )
 
@@ -93,8 +93,8 @@ Para interações baseadas em formulário:
 package main
 
 import (
-    "github.com/rafa-mori/xtui"
-    "github.com/rafa-mori/xtui/types"
+    "github.com/kubex-ecosystem/xtui"
+    "github.com/kubex-ecosystem/xtui/types"
 )
 
 func main() {
@@ -133,7 +133,7 @@ Exemplo:
 package main
 
 import (
-    "github.com/rafa-mori/xtui/cmd/cli"
+    "github.com/kubex-ecosystem/xtui/cmd/cli"
     "github.com/spf13/cobra"
 )
 
@@ -163,7 +163,7 @@ Exemplo:
 package main
 
 import (
-    "github.com/rafa-mori/xtui/cmd/cli"
+    "github.com/kubex-ecosystem/xtui/cmd/cli"
     "github.com/spf13/cobra"
 )
 
@@ -193,7 +193,7 @@ Exemplo:
 package main
 
 import (
-    "github.com/rafa-mori/xtui/cmd/cli"
+    "github.com/kubex-ecosystem/xtui/cmd/cli"
     "github.com/spf13/cobra"
 )
 
@@ -245,7 +245,7 @@ go run main.go loader-form
 package main
 
 import (
-    "github.com/rafa-mori/xtui/wrappers"
+    "github.com/kubex-ecosystem/xtui/wrappers"
 )
 
 func main() {
@@ -261,7 +261,7 @@ func main() {
 package main
 
 import (
-    "github.com/rafa-mori/xtui/wrappers"
+    "github.com/kubex-ecosystem/xtui/wrappers"
 )
 
 func main() {

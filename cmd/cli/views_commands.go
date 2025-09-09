@@ -11,9 +11,9 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/lipgloss"
-	c "github.com/rafa-mori/xtui/components"
-	gl "github.com/rafa-mori/xtui/logger"
-	t "github.com/rafa-mori/xtui/types"
+	c "github.com/kubex-ecosystem/xtui/components"
+	gl "github.com/kubex-ecosystem/xtui/logger"
+	t "github.com/kubex-ecosystem/xtui/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"

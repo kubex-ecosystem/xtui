@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	gl "github.com/rafa-mori/xtui/logger"
+	gl "github.com/kubex-ecosystem/xtui/logger"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

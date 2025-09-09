@@ -1,12 +1,12 @@
-![XTui Banner](docs/assets/top_banner.png)
+# ![XTui Banner](docs/assets/top_banner.png)
 
 **A high-performance, easy-to-use terminal user interface (TUI) library for Go, enabling developers to build interactive and visually appealing terminal applications with minimal effort.**
 
 ---
 
-![Go Version](https://img.shields.io/github/go-mod/go-version/rafa-mori/xtui)
-![License](https://img.shields.io/github/license/rafa-mori/xtui)
-![Build Status](https://img.shields.io/github/actions/workflow/status/rafa-mori/xtui/release.yml)
+![Go Version](https://img.shields.io/github/go-mod/go-version/kubex-ecosystem/xtui)
+![License](https://img.shields.io/github/license/kubex-ecosystem/xtui)
+![Build Status](https://img.shields.io/github/actions/workflow/status/kubex-ecosystem/xtui/release.yml)
 
 ## Table of Contents
 
@@ -44,7 +44,7 @@
 To install **xtui**, run the following command:
 
 ```sh
-go get github.com/rafa-mori/xtui
+go get github.com/kubex-ecosystem/xtui
 ```
 
 ## Usage
@@ -55,8 +55,8 @@ Here’s a quick example demonstrating how to use **xtui** for displaying tables
 package main
 
 import (
-	"github.com/rafa-mori/xtui"
-	"github.com/rafa-mori/xtui/types"
+ "github.com/kubex-ecosystem/xtui"
+ "github.com/kubex-ecosystem/xtui/types"
     "github.com/charmbracelet/lipgloss"
 )
 
@@ -67,12 +67,12 @@ func main() {
             {Name: "Name", Placeholder: "User Name"},
         },
     }
-    
+
     customStyles := map[string]lipgloss.Color{
         "Info":    lipgloss.Color("#75FBAB"),
         "Warning": lipgloss.Color("#FDFF90"),
     }
-    
+
     if err := xtui.StartTableScreen(config, customStyles); err != nil {
         panic(err)
     }
@@ -85,8 +85,8 @@ For form-based interactions:
 package main
 
 import (
-	"github.com/rafa-mori/xtui"
-	"github.com/rafa-mori/xtui/types"
+ "github.com/kubex-ecosystem/xtui"
+ "github.com/kubex-ecosystem/xtui/types"
 )
 
 func main() {
@@ -99,7 +99,7 @@ func main() {
             },
         },
     }
-    
+
     result, err := xtui.ShowForm(config)
     if err != nil {
         panic(err)
@@ -122,7 +122,7 @@ Example:
 package main
 
 import (
-	"github.com/rafa-mori/xtui/cmd/cli"
+ "github.com/kubex-ecosystem/xtui/cmd/cli"
     "github.com/spf13/cobra"
 )
 
@@ -150,7 +150,7 @@ Example:
 package main
 
 import (
-	"github.com/rafa-mori/xtui/cmd/cli"
+ "github.com/kubex-ecosystem/xtui/cmd/cli"
     "github.com/spf13/cobra"
 )
 
@@ -178,7 +178,7 @@ Example:
 package main
 
 import (
-	"github.com/rafa-mori/xtui/cmd/cli"
+ "github.com/kubex-ecosystem/xtui/cmd/cli"
     "github.com/spf13/cobra"
 )
 
@@ -230,7 +230,7 @@ go run main.go loader-form
 package main
 
 import (
-	"github.com/rafa-mori/xtui/wrappers"
+ "github.com/kubex-ecosystem/xtui/wrappers"
 )
 
 func main() {
@@ -246,7 +246,7 @@ func main() {
 package main
 
 import (
-	"github.com/rafa-mori/xtui/wrappers"
+ "github.com/kubex-ecosystem/xtui/wrappers"
 )
 
 func main() {
@@ -273,6 +273,7 @@ The following keyboard shortcuts are supported out of the box:
 ## Form Handling
 
 **xtui** provides an intuitive API for managing forms with validations:
+
 - **Field Validation:** Enforce required fields, minimum/maximum length, and custom validators.
 - **Password Input:** Securely handle password fields with hidden characters.
 - **Dynamic Properties:** Automatically adapt form inputs based on external configurations.
@@ -297,12 +298,13 @@ field := types.InputField{
 ## Data Export
 
 **xtui** supports exporting table data in multiple formats:
+
 - **CSV:** Saves data as a comma-separated values file.
 - **YAML:** Outputs data in a structured YAML format.
 - **JSON:** Encodes data into a compact JSON format.
 - **XML:** Exports data as XML for interoperability.
 
-### Example
+### Example (Exporting Data)
 
 To export data to a file, simply use the respective hotkey (e.g., `Ctrl+E` for CSV). Files will be saved with predefined names, such as `exported_data.csv`.
 
@@ -310,11 +312,11 @@ To export data to a file, simply use the respective hotkey (e.g., `Ctrl+E` for C
 
 To test the new navigation functionalities in the `xtui` module, you can follow these steps:
 
-* Run the unit tests provided in the repository. For example, you can run the tests in `cmd/cli/form_commands.go` and `cmd/cli/views_commands.go` using the `go test` command.
-* Use the `NavigateAndExecuteCommand` function in `cmd/cli/app_commands.go` to test command navigation and execution. You can create a new command and call this function with the command and arguments.
-* Test the form-based navigation by running the `input-form` command defined in `cmd/cli/form_commands.go`. This command uses the `NavigateAndExecuteFormCommand` function to handle form inputs and execute the command.
-* Test the table-based navigation by running the `table-view` command defined in `cmd/cli/views_commands.go`. This command uses the `NavigateAndExecuteViewCommand` function to handle table views and execute the command.
-* Test the loader-based navigation by running the `loader-form` command defined in `cmd/cli/form_commands.go`. This command uses the `wrappers.StartLoader` function to display a loader screen and execute the command.
+- Run the unit tests provided in the repository. For example, you can run the tests in `cmd/cli/form_commands.go` and `cmd/cli/views_commands.go` using the `go test` command.
+- Use the `NavigateAndExecuteCommand` function in `cmd/cli/app_commands.go` to test command navigation and execution. You can create a new command and call this function with the command and arguments.
+- Test the form-based navigation by running the `input-form` command defined in `cmd/cli/form_commands.go`. This command uses the `NavigateAndExecuteFormCommand` function to handle form inputs and execute the command.
+- Test the table-based navigation by running the `table-view` command defined in `cmd/cli/views_commands.go`. This command uses the `NavigateAndExecuteViewCommand` function to handle table views and execute the command.
+- Test the loader-based navigation by running the `loader-form` command defined in `cmd/cli/form_commands.go`. This command uses the `wrappers.StartLoader` function to display a loader screen and execute the command.
 
 ## Contributing
 

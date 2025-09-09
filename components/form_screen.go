@@ -5,13 +5,13 @@ import (
 	"reflect"
 	"strings"
 
-	gl "github.com/rafa-mori/xtui/logger"
+	gl "github.com/kubex-ecosystem/xtui/logger"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	. "github.com/rafa-mori/xtui/types"
+	. "github.com/kubex-ecosystem/xtui/types"
 )
 
 var (

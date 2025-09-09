@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	cmp "github.com/rafa-mori/xtui/components"
-	gl "github.com/rafa-mori/xtui/logger"
-	t "github.com/rafa-mori/xtui/types"
+	cmp "github.com/kubex-ecosystem/xtui/components"
+	gl "github.com/kubex-ecosystem/xtui/logger"
+	t "github.com/kubex-ecosystem/xtui/types"
 )
 
 // AppInfo show information about an installed application.

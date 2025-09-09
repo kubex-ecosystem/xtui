@@ -1,8 +1,8 @@
 package xtui
 
 import (
-	c "github.com/rafa-mori/xtui/components"
-	t "github.com/rafa-mori/xtui/types"
+	c "github.com/kubex-ecosystem/xtui/components"
+	t "github.com/kubex-ecosystem/xtui/types"
 )
 
 type Config struct{ t.FormConfig }

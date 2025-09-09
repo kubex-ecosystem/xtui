@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/rafa-mori/xtui/types"
+	"github.com/kubex-ecosystem/xtui/types"
 )
 
 var (

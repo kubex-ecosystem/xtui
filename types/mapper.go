@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
-	gl "github.com/rafa-mori/xtui/logger"
+	gl "github.com/kubex-ecosystem/xtui/logger"
 	"github.com/subosito/gotenv"
 	"gopkg.in/yaml.v3"
 )

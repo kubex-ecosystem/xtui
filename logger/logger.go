@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	l "github.com/rafa-mori/logz"
+	l "github.com/kubex-ecosystem/logz"
 )
 
 type gLog struct {

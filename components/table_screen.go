@@ -17,8 +17,8 @@ import (
 	"github.com/johnfercher/maroto/pkg/consts"
 	p "github.com/johnfercher/maroto/pkg/pdf"
 	"github.com/johnfercher/maroto/pkg/props"
-	gl "github.com/rafa-mori/xtui/logger"
-	. "github.com/rafa-mori/xtui/types"
+	gl "github.com/kubex-ecosystem/xtui/logger"
+	. "github.com/kubex-ecosystem/xtui/types"
 	"gopkg.in/yaml.v2"
 )
 
