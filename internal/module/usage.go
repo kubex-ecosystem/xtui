@@ -1,30 +1,35 @@
-package main
+package module
 
 import (
-	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strings"
 )
 
+// colorYellow, colorGreen, colorBlue, colorRed, and colorHelp are utility functions
+// that return a string formatted with the specified color using the fatih/color package.
+// These functions are used to colorize output in the CLI usage template.
+// They are registered as template functions in the CLI usage template to allow
+// coloring specific parts of the command usage output.
 func colorYellow(s string) string {
 	return color.New(color.FgYellow).SprintFunc()(s)
 }
+
 func colorGreen(s string) string {
 	return color.New(color.FgGreen).SprintFunc()(s)
 }
+
 func colorBlue(s string) string {
 	return color.New(color.FgBlue).SprintFunc()(s)
 }
+
 func colorRed(s string) string {
 	return color.New(color.FgRed).SprintFunc()(s)
 }
+
 func colorHelp(s string) string {
 	return color.New(color.FgCyan).SprintFunc()(s)
 }
+
 func hasServiceCommands(cmds []*cobra.Command) bool {
 	for _, cmd := range cmds {
 		if cmd.Annotations["service"] == "true" {
@@ -33,6 +38,7 @@ func hasServiceCommands(cmds []*cobra.Command) bool {
 	}
 	return false
 }
+
 func hasModuleCommands(cmds []*cobra.Command) bool {
 	for _, cmd := range cmds {
 		if cmd.Annotations["service"] != "true" {
@@ -41,6 +47,7 @@ func hasModuleCommands(cmds []*cobra.Command) bool {
 	}
 	return false
 }
+
 func setUsageDefinition(cmd *cobra.Command) {
 	cobra.AddTemplateFunc("colorYellow", colorYellow)
 	cobra.AddTemplateFunc("colorGreen", colorGreen)
@@ -82,62 +89,3 @@ var cliUsageTemplate = `{{- if index .Annotations "banner" }}{{colorBlue (index 
 
 {{colorYellow (printf "Use \"%s [command] --help\" for more information about a command." .CommandPath)}}{{end}}
 `
-
-const AppName = "xtui"
-
-func installCheck() {
-	usrEnvs := os.Environ()
-	envPath := os.Getenv("PATH")
-	usrEnvs = append(usrEnvs, fmt.Sprintf("PATH=%s", envPath))
-	appBinPath, appBinPathErr := exec.LookPath(AppName)
-	if appBinPathErr != nil {
-		fmt.Printf("Error: %v\n", appBinPathErr)
-		return
-	}
-	appBinPath = strings.Replace(appBinPath, AppName, "", 1)
-
-}
-
-func cacheFlagAskForInstall(action string) (bool, error) {
-	cacheDir, cacheDirErr := os.UserCacheDir()
-	if cacheDirErr != nil {
-		cacheDir = os.TempDir()
-		if cacheDir == "" {
-			cacheDir = "/tmp"
-		}
-	}
-	userName, userNameErr := os.UserHomeDir()
-	if userNameErr != nil {
-		userName = "user"
-	}
-	cacheFilePath := filepath.Join(cacheDir, AppName, userName)
-
-	// Essa lógica será para gravar a opção do usuário de instalar o módulo ou não.
-	// A opção será gravada em um arquivo na pasta de cache do usuário.
-	// O arquivo só será lido/buscado se o módulo não estiver instalado.
-	// Se o arquivo existir, não haverá pergunta ao usuário.
-	// O parâmetro action será para definir se será criado, lido ou removido o arquivo.
-	switch action {
-	case "create":
-		// Cria o arquivo de cache, não perguntando nada pois a pergunta será feita em outro mtodo, anterior a este.
-		// O arquivo será criado sem conteúdo, somente para sinalizar que a pergunta foi feita reduzindo a leiura em
-		// busca de conteúdo, somente a verificação da existência do arquivo já é o próprio valor esperacdo.
-		if mkdirErr := os.MkdirAll(cacheFilePath, 0755); mkdirErr != nil {
-			return false, mkdirErr
-		}
-	case "check":
-		// Verifica se o arquivo de cache existe
-		if _, statErr := os.Stat(cacheFilePath); statErr != nil {
-			return false, statErr
-		} else {
-			return true, nil
-		}
-	case "remove":
-		// Remove o arquivo de cache
-		if removeErr := os.RemoveAll(cacheFilePath); removeErr != nil {
-			return false, removeErr
-		}
-	}
-
-	return false, nil
-}
