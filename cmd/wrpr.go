@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
-	l "github.com/rafa-mori/logz"
-	"github.com/rafa-mori/xtui/cmd/cli"
-	gl "github.com/rafa-mori/xtui/logger"
-	"github.com/rafa-mori/xtui/version"
+	l "github.com/kubex-ecosystem/logz"
+	"github.com/kubex-ecosystem/xtui/cmd/cli"
+	gl "github.com/kubex-ecosystem/xtui/logger"
+	"github.com/kubex-ecosystem/xtui/version"
 	"github.com/spf13/cobra"
 )
 

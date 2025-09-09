@@ -5,8 +5,8 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/rafa-mori/xtui/components"
-	"github.com/rafa-mori/xtui/wrappers"
+	"github.com/kubex-ecosystem/xtui/components"
+	"github.com/kubex-ecosystem/xtui/wrappers"
 	"github.com/spf13/cobra"
 )
 

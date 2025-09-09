@@ -1,6 +1,6 @@
-module github.com/rafa-mori/xtui
+module github.com/kubex-ecosystem/xtui
 
-go 1.24.4
+go 1.25.1
 
 require (
 	github.com/atotto/clipboard v0.1.4
@@ -11,7 +11,7 @@ require (
 	github.com/johnfercher/maroto v1.0.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/pelletier/go-toml/v2 v2.2.4
-	github.com/rafa-mori/logz v1.3.0
+	github.com/kubex-ecosystem/logz v1.5.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/subosito/gotenv v1.6.0

@@ -44,7 +44,7 @@
 To install **xtui**, run the following command:
 
 ```sh
-go get github.com/rafa-mori/xtui
+go get github.com/kubex-ecosystem/xtui
 ```
 
 ## Usage
@@ -55,8 +55,8 @@ Here’s a quick example demonstrating how to use **xtui** for displaying tables
 package main
 
 import (
-	"github.com/rafa-mori/xtui"
-	"github.com/rafa-mori/xtui/types"
+	"github.com/kubex-ecosystem/xtui"
+	"github.com/kubex-ecosystem/xtui/types"
     "github.com/charmbracelet/lipgloss"
 )
 
@@ -85,8 +85,8 @@ For form-based interactions:
 package main
 
 import (
-	"github.com/rafa-mori/xtui"
-	"github.com/rafa-mori/xtui/types"
+	"github.com/kubex-ecosystem/xtui"
+	"github.com/kubex-ecosystem/xtui/types"
 )
 
 func main() {
@@ -122,7 +122,7 @@ Example:
 package main
 
 import (
-	"github.com/rafa-mori/xtui/cmd/cli"
+	"github.com/kubex-ecosystem/xtui/cmd/cli"
     "github.com/spf13/cobra"
 )
 
@@ -150,7 +150,7 @@ Example:
 package main
 
 import (
-	"github.com/rafa-mori/xtui/cmd/cli"
+	"github.com/kubex-ecosystem/xtui/cmd/cli"
     "github.com/spf13/cobra"
 )
 
@@ -178,7 +178,7 @@ Example:
 package main
 
 import (
-	"github.com/rafa-mori/xtui/cmd/cli"
+	"github.com/kubex-ecosystem/xtui/cmd/cli"
     "github.com/spf13/cobra"
 )
 
@@ -230,7 +230,7 @@ go run main.go loader-form
 package main
 
 import (
-	"github.com/rafa-mori/xtui/wrappers"
+	"github.com/kubex-ecosystem/xtui/wrappers"
 )
 
 func main() {
@@ -246,7 +246,7 @@ func main() {
 package main
 
 import (
-	"github.com/rafa-mori/xtui/wrappers"
+	"github.com/kubex-ecosystem/xtui/wrappers"
 )
 
 func main() {

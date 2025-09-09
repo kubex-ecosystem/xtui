@@ -14,7 +14,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	gl "github.com/rafa-mori/xtui/logger"
+	gl "github.com/kubex-ecosystem/xtui/logger"
 )
 
 type KbxDepsModel struct {

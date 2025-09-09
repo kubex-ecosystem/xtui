@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	gl "github.com/rafa-mori/xtui/logger"
-	p "github.com/rafa-mori/xtui/packages"
+	gl "github.com/kubex-ecosystem/xtui/logger"
+	p "github.com/kubex-ecosystem/xtui/packages"
 	"github.com/spf13/cobra"
 )
 

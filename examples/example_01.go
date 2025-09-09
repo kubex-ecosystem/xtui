@@ -2,7 +2,7 @@ package examples
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
-	c "github.com/rafa-mori/xtui/components"
+	c "github.com/kubex-ecosystem/xtui/components"
 )
 
 type AppModel struct {

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	. "github.com/rafa-mori/xtui/components"
-	gl "github.com/rafa-mori/xtui/logger"
-	. "github.com/rafa-mori/xtui/wrappers"
+	. "github.com/kubex-ecosystem/xtui/components"
+	gl "github.com/kubex-ecosystem/xtui/logger"
+	. "github.com/kubex-ecosystem/xtui/wrappers"
 	"github.com/spf13/cobra"
 )
 

@@ -1,8 +1,8 @@
 package version
 
 import (
-	l "github.com/rafa-mori/logz"
-	gl "github.com/rafa-mori/xtui/logger"
+	l "github.com/kubex-ecosystem/logz"
+	gl "github.com/kubex-ecosystem/xtui/logger"
 
 	"github.com/spf13/cobra"
 
@@ -18,7 +18,7 @@ import (
 
 const moduleAlias = "XTuI"
 const moduleName = "xtui"
-const gitModelUrl = "https://github.com/rafa-mori/" + moduleName + ".git"
+const gitModelUrl = "https://github.com/kubex-ecosystem/" + moduleName + ".git"
 const currentVersionFallback = "v1.3.1" // First version with the version file
 
 type Service interface {
