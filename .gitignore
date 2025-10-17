@@ -58,3 +58,4 @@ dist/*
 .claude/
 CLAUDE.md
 .venv-hooks
+xtui-types_partial.lkt.txt
