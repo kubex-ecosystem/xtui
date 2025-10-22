@@ -1,3 +1,4 @@
+// Package packages provides utilities for managing applications and dependencies.
 package packages
 
 import (
@@ -7,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	gl "github.com/kubex-ecosystem/logz/logger"
 	cmp "github.com/kubex-ecosystem/xtui/components"
-	gl "github.com/kubex-ecosystem/xtui/logger"
 	t "github.com/kubex-ecosystem/xtui/types"
 )
 
@@ -58,12 +59,12 @@ func CheckDeps(validationFilePath string, version string) bool {
 func GenDepsScript(depsList []string, scriptPath string, validationFilePath string, version string) error {
 	validationFilePath = fmt.Sprintf("%s_%s", validationFilePath, version)
 	scriptContent := `#!/bin/bash
-	
+
 	# Função para verificar se um comando está disponível
 	command_exists() {
 	    dpkg -l "$1" &> /dev/null
 	}
-	
+
 	# Lista de dependências
 	dependencies=(
 	`
@@ -75,7 +76,7 @@ func GenDepsScript(depsList []string, scriptPath string, validationFilePath stri
 		scriptContent += fmt.Sprintf("    \"%s\"\n", dep)
 	}
 	scriptContent += `)
-	
+
 	# Verifica e instala dependências
 	for dep in "${dependencies[@]}"; do
 	    if ! command_exists $dep; then
@@ -91,17 +92,17 @@ func GenDepsScript(depsList []string, scriptPath string, validationFilePath stri
 	        echo "$dep já está instalado."
 	    fi
 	done
-	
+
 	# Cria arquivo de validação
 	mkdir -p $(dirname ` + validationFilePath + `)
 	touch ` + validationFilePath + `
-	
+
 	echo "Todas as dependências foram verificadas e instaladas."
-	
+
 	sleep 3
-	
+
 	printf "\033[H\033[2J"
-	
+
 	`
 	err := os.WriteFile(scriptPath, []byte(scriptContent), 0755) //nolint:gosec
 	if err != nil {
@@ -154,7 +155,7 @@ func getInstalledAppsHandler(name string, status string, method string) (t.Table
 	//if method != "" {
 	//	methodFilter = fmt.Sprintf("| grep -i %s", method)
 	//}
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("dpkg-query -W -f='${Package}\\t${Version}\\t${Status}\\t${Description}\\n'")) //nolint:gosec
+	cmd := exec.Command("bash", "-c", "dpkg-query -W -f='${Package}\\t${Version}\\t${Status}\\t${Description}\\n'") //nolint:gosec
 	output, err := cmd.Output()
 	if err != nil {
 		gl.Log("error", "Error getting installed apps: "+err.Error())

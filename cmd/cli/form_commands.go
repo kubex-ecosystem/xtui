@@ -75,6 +75,7 @@ func LoaderFormCommand() *cobra.Command {
 }
 
 // Unit tests for InputFormCommand
+
 func TestInputFormCommand(t *testing.T) {
 	cmd := InputFormCommand()
 	if cmd.Use != "input-form" {
@@ -89,6 +90,7 @@ func TestInputFormCommand(t *testing.T) {
 }
 
 // Unit tests for LoaderFormCommand
+
 func TestLoaderFormCommand(t *testing.T) {
 	cmd := LoaderFormCommand()
 	if cmd.Use != "loader-form" {

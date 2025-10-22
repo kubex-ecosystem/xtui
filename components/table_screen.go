@@ -17,14 +17,14 @@ import (
 	"github.com/johnfercher/maroto/pkg/consts"
 	p "github.com/johnfercher/maroto/pkg/pdf"
 	"github.com/johnfercher/maroto/pkg/props"
-	gl "github.com/kubex-ecosystem/xtui/logger"
-	. "github.com/kubex-ecosystem/xtui/types"
+	gl "github.com/kubex-ecosystem/logz/logger"
+	tp "github.com/kubex-ecosystem/xtui/types"
 	"gopkg.in/yaml.v2"
 )
 
 // TableRenderer is responsible for rendering tables in the terminal with customizable styles and dynamic behavior.
 type TableRenderer struct {
-	tbHandler    TableDataHandler
+	tbHandler    tp.TableDataHandler
 	kTb          *table.Table
 	headers      []string
 	rows         [][]string
@@ -44,7 +44,7 @@ type TableRenderer struct {
 type StyleFunc func(row, col int, cellValue string) lipgloss.Style
 
 // NewTableRenderer creates a new TableRenderer with custom styles and an optional style function.
-func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) *TableRenderer {
+func NewTableRenderer(tbHandler tp.TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) *TableRenderer {
 	headers := tbHandler.GetHeaders()
 	rows := tbHandler.GetRows()
 	re := lipgloss.NewRenderer(os.Stdout)
@@ -74,7 +74,7 @@ func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipglo
 				return baseStyle
 			}
 			if rows != nil && len(rows) < rowIndex {
-				if rows[rowIndex] != nil && len(rows[rowIndex]) > 1 {
+				if len(rows[rowIndex]) > 1 {
 					if rows[rowIndex][1] == "Bug" {
 						return selectedStyle
 					}
@@ -127,8 +127,7 @@ func NewTableRenderer(tbHandler TableDataHandler, customStyles map[string]lipglo
 				return baseStyle
 			}
 			if rows != nil && rowIndex < len(rows) {
-				if rows[rowIndex] != nil &&
-					len(rows[rowIndex]) > 1 &&
+				if len(rows[rowIndex]) > 1 &&
 					len(rows[rowIndex]) > col &&
 					len(rows[rowIndex]) > 1 {
 					if rows[rowIndex][1] == "Bug" {
@@ -554,13 +553,13 @@ func (k *TableRenderer) ToggleColumnVisibility() {
 // Execution functions
 
 // GetTableScreenCustom returns the string representation of the table with custom styles and an optional style function.
-func GetTableScreenCustom(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) string {
+func GetTableScreenCustom(tbHandler tp.TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) string {
 	k := NewTableRenderer(tbHandler, customStyles, styleFunc)
 	return k.View()
 }
 
 // NavigateAndExecuteTableCustom navigates and executes the table screen with custom styles and an optional style function.
-func NavigateAndExecuteTableCustom(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) error {
+func NavigateAndExecuteTableCustom(tbHandler tp.TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) error {
 	k := NewTableRenderer(tbHandler, customStyles, styleFunc)
 
 	prog := tea.NewProgram(k, tea.WithAltScreen())
@@ -572,7 +571,7 @@ func NavigateAndExecuteTableCustom(tbHandler TableDataHandler, customStyles map[
 }
 
 // StartTableScreenCustom starts the table screen with custom styles and an optional style function.
-func StartTableScreenCustom(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) error {
+func StartTableScreenCustom(tbHandler tp.TableDataHandler, customStyles map[string]lipgloss.Color, styleFunc StyleFunc) error {
 	k := NewTableRenderer(tbHandler, customStyles, styleFunc)
 
 	prog := tea.NewProgram(k, tea.WithAltScreen())
@@ -584,17 +583,17 @@ func StartTableScreenCustom(tbHandler TableDataHandler, customStyles map[string]
 }
 
 // GetTableScreen returns the string representation of the table with custom styles.
-func GetTableScreen(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) string {
+func GetTableScreen(tbHandler tp.TableDataHandler, customStyles map[string]lipgloss.Color) string {
 	return GetTableScreenCustom(tbHandler, customStyles, nil)
 }
 
 // NavigateAndExecuteTable navigates and executes the table screen with custom styles.
-func NavigateAndExecuteTable(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) error {
+func NavigateAndExecuteTable(tbHandler tp.TableDataHandler, customStyles map[string]lipgloss.Color) error {
 	return NavigateAndExecuteTableCustom(tbHandler, customStyles, nil)
 }
 
 // StartTableScreen starts the table screen with custom styles.
-func StartTableScreen(tbHandler TableDataHandler, customStyles map[string]lipgloss.Color) error {
+func StartTableScreen(tbHandler tp.TableDataHandler, customStyles map[string]lipgloss.Color) error {
 	return StartTableScreenCustom(tbHandler, customStyles, nil)
 }
 

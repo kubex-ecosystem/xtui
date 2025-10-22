@@ -1,6 +1,7 @@
 package types
 
 // Form and Field Error interface and types
+
 type FormError interface {
 	Error() string
 	ErrorOrNil() error

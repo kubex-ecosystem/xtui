@@ -1,3 +1,4 @@
+// Package types provides type definitions and interfaces for form handling and validation.
 package types
 
 import (

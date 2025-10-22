@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"strings"
 
+	gl "github.com/kubex-ecosystem/logz/logger"
 	"github.com/pelletier/go-toml/v2"
-	gl "github.com/kubex-ecosystem/xtui/logger"
 	"github.com/subosito/gotenv"
 	"gopkg.in/yaml.v3"
 )
@@ -46,12 +46,12 @@ func NewMapperType[T any](object *T, filePath string) *Mapper[T] {
 
 // NewMapperPtr creates a new instance of Mapper.
 func NewMapperPtr[T any](object *T, filePath string) *Mapper[*T] {
-	return &Mapper[*T]{filePath: filePath, object: *&object}
+	return &Mapper[*T]{filePath: filePath, object: object}
 }
 
 // NewMapper creates a new instance of Mapper.
 func NewMapper[T any](object *T, filePath string) IMapper[T] {
-	return NewMapperType[T](object, filePath)
+	return NewMapperType(object, filePath)
 }
 
 // Serialize converts an object of type T to a byte array in the specified format.
@@ -223,7 +223,6 @@ func (m *Mapper[T]) DeserializeFromFile(format string) (T, error) {
 			gl.Log("error", fmt.Sprintf("Error closing file: %v", closeErr.Error()))
 			return
 		}
-		return
 	}(inputFile)
 
 	reader := bufio.NewReader(inputFile)
@@ -267,7 +266,6 @@ func (m *Mapper[T]) DeserializeFromFile(format string) (T, error) {
 			m.object = *reflect.ValueOf(objSlice).Interface().(*T)
 			return m.object, nil
 		}
-		break
 	case reflect.Map:
 		if value.Len() == 0 {
 			// If the map is empty, assign the deserialized object to the map
@@ -275,7 +273,6 @@ func (m *Mapper[T]) DeserializeFromFile(format string) (T, error) {
 			return m.object, nil
 		}
 		isSliceOrMap = 1
-		break
 	default:
 		// If the type is neither a slice nor a map, assign the first object to m.object
 		if len(objSlice) == 0 {
@@ -287,7 +284,6 @@ func (m *Mapper[T]) DeserializeFromFile(format string) (T, error) {
 			return *new(T), fmt.Errorf("múltiplos objetos encontrados no arquivo")
 		}
 		m.object = objSlice[0]
-		break
 	}
 
 	for _, obj := range objSlice {

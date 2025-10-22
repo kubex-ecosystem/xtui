@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kubex-ecosystem/xtui/cmd/cli"
-	gl "github.com/kubex-ecosystem/xtui/internal/module/logger"
+	gl "github.com/kubex-ecosystem/logz/logger"
 	"github.com/kubex-ecosystem/xtui/internal/module/version"
 	"github.com/spf13/cobra"
 

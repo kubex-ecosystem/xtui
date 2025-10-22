@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	. "github.com/kubex-ecosystem/xtui/components"
-	gl "github.com/kubex-ecosystem/xtui/logger"
-	. "github.com/kubex-ecosystem/xtui/wrappers"
+	cp "github.com/kubex-ecosystem/xtui/components"
+	gl "github.com/kubex-ecosystem/logz/logger"
+	wp "github.com/kubex-ecosystem/xtui/wrappers"
 	"github.com/spf13/cobra"
 )
 
@@ -42,22 +42,22 @@ func InstallApplicationsCommand() *cobra.Command {
 			availableProperties := getAvailableProperties()
 			if len(availableProperties) > 0 {
 				adaptedArgs := adaptArgsToProperties(args, availableProperties)
-				return InstallDependenciesWithUI(adaptedArgs...)
+				return wp.InstallDependenciesWithUI(adaptedArgs...)
 			}
 
 			// Notification: Starting installation
-			DisplayNotification("Starting installation of applications", "info")
+			cp.DisplayNotification("Starting installation of applications", "info")
 
-			err := InstallDependenciesWithUI(args...)
+			err := wp.InstallDependenciesWithUI(args...)
 
 			if err != nil {
 				// Notification: Error during installation
-				DisplayNotification(fmt.Sprintf("Error during installation: %s", err.Error()), "error")
+				cp.DisplayNotification(fmt.Sprintf("Error during installation: %s", err.Error()), "error")
 				return err
 			}
 
 			// Notification: Successful installation
-			DisplayNotification("Applications installed successfully", "info")
+			cp.DisplayNotification("Applications installed successfully", "info")
 
 			return nil
 		},
@@ -78,7 +78,7 @@ func NavigateAndExecuteCommand(cmd *cobra.Command, args []string) error {
 
 	// Display command selection and flag definition in a form
 	formConfig := createFormConfig(commandName, flags)
-	formResult, err := ShowFormWithNotification(formConfig)
+	formResult, err := cp.ShowFormWithNotification(formConfig)
 	if err != nil {
 		return err
 	}

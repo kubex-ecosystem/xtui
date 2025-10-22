@@ -20,11 +20,13 @@ func NewFormConfig(title string, fields []FormInputObject[any]) FormConfig {
 	}
 }
 
-func (f FormConfig) GetTitle() string      { return f.Title }
-func (f FormConfig) SetTitle(title string) { f.Title = title }
+func (f *FormConfig) GetTitle() string      { return f.Title }
+func (f *FormConfig) SetTitle(title string) {
+	f.Title = title
+}
 
-func (f FormConfig) GetFields() []FormInputObject[any] { return f.Fields }
-func (f FormConfig) GetField(name string) FormInputObject[any] {
+func (f *FormConfig) GetFields() []FormInputObject[any] { return f.Fields }
+func (f *FormConfig) GetField(name string) FormInputObject[any] {
 	for _, field := range f.Fields {
 		if field.GetName() == name {
 			return field
@@ -32,7 +34,7 @@ func (f FormConfig) GetField(name string) FormInputObject[any] {
 	}
 	return nil
 }
-func (f FormConfig) GetFieldValue(name string) any {
+func (f *FormConfig) GetFieldValue(name string) any {
 	for _, field := range f.Fields {
 		if field.GetName() == name {
 			return field.GetValue()
@@ -41,7 +43,7 @@ func (f FormConfig) GetFieldValue(name string) any {
 	return nil
 }
 
-func (f FormConfig) SetFieldValue(name string, value any) error {
+func (f *FormConfig) SetFieldValue(name string, value any) error {
 	for _, field := range f.Fields {
 		if field.GetName() == name {
 			return field.SetValue(value)
@@ -49,7 +51,7 @@ func (f FormConfig) SetFieldValue(name string, value any) error {
 	}
 	return nil
 }
-func (f FormConfig) SetField(name string, field FormInputObject[any]) error {
+func (f *FormConfig) SetField(name string, field FormInputObject[any]) error {
 	for i, cf := range f.GetFields() {
 		if cf.GetName() == name {
 			f.Fields[i] = field
@@ -59,8 +61,8 @@ func (f FormConfig) SetField(name string, field FormInputObject[any]) error {
 	return nil
 }
 
-func (f FormConfig) AddField(field FormInputObject[any]) { f.Fields = append(f.Fields, field) }
-func (f FormConfig) RemoveField(name string) error {
+func (f *FormConfig) AddField(field FormInputObject[any]) { f.Fields = append(f.Fields, field) }
+func (f *FormConfig) RemoveField(name string) error {
 	for i, field := range f.Fields {
 		if field.GetName() == name {
 			f.Fields = append(f.Fields[:i], f.Fields[i+1:]...)

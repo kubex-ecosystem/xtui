@@ -1,3 +1,4 @@
+// Package cli provides command-line interface commands for the application.
 package cli
 
 import (
@@ -11,8 +12,8 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/lipgloss"
+	gl "github.com/kubex-ecosystem/logz/logger"
 	c "github.com/kubex-ecosystem/xtui/components"
-	gl "github.com/kubex-ecosystem/xtui/logger"
 	t "github.com/kubex-ecosystem/xtui/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -219,7 +220,7 @@ func NavigateAndExecuteViewCommand(cmd *cobra.Command, args []string) error {
 	}
 	for _, row := range tableConfig.GetRows() {
 		var i = 0
-		for key, _ := range tableValues {
+		for key:= range tableValues {
 			tableValues[key] = row[i]
 			i++
 		}
