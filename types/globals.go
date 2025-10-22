@@ -106,7 +106,7 @@ type ValidationRule string
 const (
 	Required ValidationRule = "required"
 	Email    ValidationRule = "email"
-	Url      ValidationRule = "url"
+	URL      ValidationRule = "url"
 	IP       ValidationRule = "ip"
 	Port     ValidationRule = "port"
 	Min      ValidationRule = "min"

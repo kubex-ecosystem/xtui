@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
-	gl "github.com/kubex-ecosystem/xtui/logger"
+	gl "github.com/kubex-ecosystem/logz/logger"
 	p "github.com/kubex-ecosystem/xtui/packages"
 	"github.com/spf13/cobra"
 )
 
 // appsCmdsList retorna uma lista de comandos Cobra relacionados a aplicativos.
 // Retorna um slice de ponteiros para comandos Cobra e um erro, se houver.
+
 func PkgCmdsList() []*cobra.Command {
 	return []*cobra.Command{
 		appsCmdAdd(),
@@ -131,7 +132,7 @@ func appsCmdList() *cobra.Command {
 				gl.Log("success", "Apps listed successfully")
 				if os.Getenv("XTUI_QUIET") == "" || os.Getenv("NON_INTERACTIVE") == "" {
 					timeSpent := time.Since(startTime).Seconds()
-					fmt.Println(fmt.Sprintf("----------------------------------------------------------%s", "\n"))
+					fmt.Println("----------------------------------------------------------\n ")
 					gl.Log("success", "Everything was fine and work as expected!")
 					gl.Log("success", fmt.Sprintf("You spent %.2f seconds on running the XTuI module", timeSpent))
 					gl.Log("success", "Hope you have enjoyed it! See you soon!!!\n")

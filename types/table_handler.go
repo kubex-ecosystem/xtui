@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 type TableDataHandler interface {
 	GetHeaders() []string
 	GetRows() [][]string
@@ -20,7 +22,7 @@ func NewTableHandlerFromRows(headers []string, rows [][]string) TableDataHandler
 	if len(headers) == 0 {
 		headers = make([]string, len(rows[0]))
 		for i := range headers {
-			headers[i] = "Column " + string(i+1)
+			headers[i] = fmt.Sprintf("Column %d", i+1)
 		}
 	}
 	return &TableHandler{

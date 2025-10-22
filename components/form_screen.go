@@ -1,3 +1,4 @@
+// Package components provides reusable UI components for terminal applications.
 package components
 
 import (
@@ -5,13 +6,13 @@ import (
 	"reflect"
 	"strings"
 
-	gl "github.com/kubex-ecosystem/xtui/logger"
+	gl "github.com/kubex-ecosystem/logz/logger"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	. "github.com/kubex-ecosystem/xtui/types"
+	tp "github.com/kubex-ecosystem/xtui/types"
 )
 
 var (
@@ -34,17 +35,15 @@ type FormModel struct {
 	FocusIndex   int
 	Inputs       []textinput.Model
 	CursorMode   cursor.Mode
-	Fields       []FormInputObject[any]
+	Fields       []tp.FormInputObject[any]
 	ErrorMessage string
 }
 
-func initialFormModel(config FormConfig) FormModel {
+func initialFormModel(config tp.FormConfig) FormModel {
 	cfg := &config
-	var inputs []FormInputObject[any]
+	var inputs []tp.FormInputObject[any]
 
-	for _, field := range cfg.Fields {
-		inputs = append(inputs, field)
-	}
+	inputs = append(inputs, cfg.Fields...)
 
 	availableProperties := getAvailableProperties()
 	if len(availableProperties) > 0 {
@@ -66,7 +65,7 @@ func initialFormModel(config FormConfig) FormModel {
 		t.Cursor.Style = cursorStyle
 		t.CharLimit = 32
 
-		tField := NewFormInput(field)
+		tField := tp.NewFormInput(field)
 
 		t.Placeholder = tField.Placeholder()
 		t.SetValue(tField.String())
@@ -184,7 +183,7 @@ func (m *FormModel) View() string {
 func (m *FormModel) submit() tea.Cmd {
 	for i, input := range m.Inputs {
 		value := input.Value()
-		field := m.Fields[i].(FormInput[any])
+		field := m.Fields[i].(tp.FormInput[any])
 
 		if field.IsRequired() && value == "" {
 			m.ErrorMessage = field.Error()
@@ -213,21 +212,21 @@ func (m *FormModel) submit() tea.Cmd {
 	return tea.Quit
 }
 
-func ShowForm(config FormConfig) (map[string]string, error) {
+func ShowForm(config tp.FormConfig) (map[string]string, error) {
 	inputResult = make(map[string]string)
-	var newConfig FormConfig
+	var newConfig tp.FormConfig
 	var newFields = config.Fields
 	if newFields == nil {
-		iNewConfig := FormConfig{
+		iNewConfig := tp.FormConfig{
 			Title: config.Title,
-			FormFields: FormFields{
+			FormFields: tp.FormFields{
 				Title:  config.Title,
 				Fields: config.GetFields(),
 			},
 		}
-		newConfig = FormConfig{
+		newConfig = tp.FormConfig{
 			Title: iNewConfig.Title,
-			FormFields: FormFields{
+			FormFields: tp.FormFields{
 				Title:  iNewConfig.Title,
 				Fields: config.GetFields(),
 			},
@@ -259,17 +258,17 @@ func getAvailableProperties() map[string]string {
 	}
 }
 
-func adaptInputsToProperties(inputs []FormInputObject[any], properties map[string]string) []FormInputObject[any] {
+func adaptInputsToProperties(inputs []tp.FormInputObject[any], properties map[string]string) []tp.FormInputObject[any] {
 	adaptedInputs := inputs
 	for _, value := range properties {
 		vl := reflect.ValueOf(value)
-		v := NewInput(vl.Interface().(FormInputObject[any]))
+		v := tp.NewInput(vl.Interface().(tp.FormInputObject[any]))
 		adaptedInputs = append(adaptedInputs, v.GetValue())
 	}
 	return adaptedInputs
 }
 
-func NavigateAndExecuteForm(config FormConfig) (map[string]string, error) {
+func NavigateAndExecuteForm(config tp.FormConfig) (map[string]string, error) {
 	inputResult = make(map[string]string)
 	initialModel := initialFormModel(config)
 	_, resultModelErr := tea.NewProgram(&initialModel).Run()
@@ -281,7 +280,7 @@ func NavigateAndExecuteForm(config FormConfig) (map[string]string, error) {
 	return inputResult, nil
 }
 
-func ShowFormWithNotification(config FormConfig) (map[string]string, error) {
+func ShowFormWithNotification(config tp.FormConfig) (map[string]string, error) {
 	inputResult = make(map[string]string)
 	initialModel := initialFormModel(config)
 	_, resultModelErr := tea.NewProgram(&initialModel).Run()
