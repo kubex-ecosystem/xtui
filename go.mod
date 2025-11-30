@@ -1,6 +1,6 @@
 module github.com/kubex-ecosystem/xtui
 
-go 1.25.3
+go 1.25.4
 
 require (
 	github.com/atotto/clipboard v0.1.4
