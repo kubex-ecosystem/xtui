@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"strings"
 
-	gl "github.com/kubex-ecosystem/logz/logger"
+	gl "github.com/kubex-ecosystem/logz"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/subosito/gotenv"
 	"gopkg.in/yaml.v3"

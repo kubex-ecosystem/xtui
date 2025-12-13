@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	gl "github.com/kubex-ecosystem/logz/logger"
+	gl "github.com/kubex-ecosystem/logz"
 	cmp "github.com/kubex-ecosystem/xtui/components"
 	t "github.com/kubex-ecosystem/xtui/types"
 )

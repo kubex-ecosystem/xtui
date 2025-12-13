@@ -4,12 +4,12 @@ package module
 import (
 	"fmt"
 
+	gl "github.com/kubex-ecosystem/logz"
 	"github.com/kubex-ecosystem/xtui/cmd/cli"
-	gl "github.com/kubex-ecosystem/logz/logger"
 	"github.com/kubex-ecosystem/xtui/internal/module/version"
 	"github.com/spf13/cobra"
 
-	l "github.com/kubex-ecosystem/logz"
+	gl "github.com/kubex-ecosystem/logz"
 
 	"os"
 	"strings"

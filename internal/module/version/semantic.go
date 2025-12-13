@@ -12,11 +12,11 @@ import (
 	"time"
 
 	manifest "github.com/kubex-ecosystem/xtui/internal/module/info"
-	"github.com/kubex-ecosystem/logz/logger"
+	"github.com/kubex-ecosystem/logz"
 	"github.com/spf13/cobra"
 )
 
-var gl = logger.GetLogger[ServiceImpl](nil)
+var gl = logz.GetLoggerZ("XTUI")
 var (
 	info manifest.Manifest
 	vrs  Service

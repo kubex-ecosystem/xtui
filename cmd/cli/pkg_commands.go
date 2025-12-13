@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	gl "github.com/kubex-ecosystem/logz/logger"
+	gl "github.com/kubex-ecosystem/logz"
 	p "github.com/kubex-ecosystem/xtui/packages"
 	"github.com/spf13/cobra"
 )
