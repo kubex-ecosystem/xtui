@@ -35,7 +35,7 @@ type Tag struct {
 }
 
 func init() {
-	l.GetLogger(moduleAlias)
+	gl.GetLoggerZ(moduleAlias)
 }
 
 func getLatestTag(repoURL string) (string, error) {
