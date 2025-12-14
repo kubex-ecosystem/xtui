@@ -1,8 +1,7 @@
 package version
 
 import (
-	l "github.com/kubex-ecosystem/logz"
-	gl "github.com/kubex-ecosystem/logz/logger"
+	gl "github.com/kubex-ecosystem/logz"
 
 	"github.com/spf13/cobra"
 

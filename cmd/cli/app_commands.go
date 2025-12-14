@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	gl "github.com/kubex-ecosystem/logz"
 	cp "github.com/kubex-ecosystem/xtui/components"
-	gl "github.com/kubex-ecosystem/logz/logger"
 	wp "github.com/kubex-ecosystem/xtui/wrappers"
 	"github.com/spf13/cobra"
 )

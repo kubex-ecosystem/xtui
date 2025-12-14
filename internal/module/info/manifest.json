@@ -10,6 +10,7 @@
   "repository": "https://github.com/kubex-ecosystem/xtui",
   "homepage": "https://github.com/kubex-ecosystem/xtui",
   "description": "Kubex - XTUI is a command-line tool for managing, creating and interacting with terminal user interfaces.",
+  "go_version": "1.25.5",
   "main": "cmd/main.go",
   "bin": "xtui",
   "author": "Rafael Mori <faelmori@gmail.com>",

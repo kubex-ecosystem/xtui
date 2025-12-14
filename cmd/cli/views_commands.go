@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/lipgloss"
-	gl "github.com/kubex-ecosystem/logz/logger"
+	gl "github.com/kubex-ecosystem/logz"
 	c "github.com/kubex-ecosystem/xtui/components"
 	t "github.com/kubex-ecosystem/xtui/types"
 	"github.com/spf13/cobra"
@@ -220,7 +220,7 @@ func NavigateAndExecuteViewCommand(cmd *cobra.Command, args []string) error {
 	}
 	for _, row := range tableConfig.GetRows() {
 		var i = 0
-		for key:= range tableValues {
+		for key := range tableValues {
 			tableValues[key] = row[i]
 			i++
 		}
