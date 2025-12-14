@@ -9,8 +9,6 @@ import (
 	"github.com/kubex-ecosystem/xtui/internal/module/version"
 	"github.com/spf13/cobra"
 
-	gl "github.com/kubex-ecosystem/logz"
-
 	"os"
 	"strings"
 )
@@ -71,7 +69,7 @@ func (m *XTui) concatenateExamples() string {
 
 // Command retorna o comando cobra para o módulo.
 func (m *XTui) Command() *cobra.Command {
-	l.GetLogger("XTuI")
+	gl.GetLogger("XTuI")
 
 	gl.Log("debug", fmt.Sprintf("Creating command for XTuI with flags: %v", os.Args))
 
