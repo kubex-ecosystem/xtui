@@ -2,8 +2,6 @@
 package module
 
 import (
-	"fmt"
-
 	gl "github.com/kubex-ecosystem/logz"
 	"github.com/kubex-ecosystem/xtui/cmd/cli"
 	"github.com/kubex-ecosystem/xtui/internal/module/version"
@@ -71,7 +69,7 @@ func (m *XTui) concatenateExamples() string {
 func (m *XTui) Command() *cobra.Command {
 	gl.GetLogger("XTuI")
 
-	gl.Log("debug", fmt.Sprintf("Creating command for XTuI with flags: %v", os.Args))
+	gl.Debugf("Creating command for XTuI with flags: %v", os.Args)
 
 	c := &cobra.Command{
 		Use:         m.Module(),

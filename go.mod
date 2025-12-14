@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/fatih/color v1.18.0
 	github.com/johnfercher/maroto v1.0.0
-	github.com/kubex-ecosystem/logz v1.5.5
+	github.com/kubex-ecosystem/logz v1.6.4
 	github.com/mattn/go-isatty v0.0.20
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/spf13/cobra v1.10.2
