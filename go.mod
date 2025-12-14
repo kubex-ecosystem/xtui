@@ -12,7 +12,7 @@ require (
 	github.com/kubex-ecosystem/logz v1.5.5
 	github.com/mattn/go-isatty v0.0.20
 	github.com/pelletier/go-toml/v2 v2.2.4
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/subosito/gotenv v1.6.0
 	gopkg.in/yaml.v2 v2.4.0
