@@ -127,8 +127,7 @@ func NewTableRenderer(tbHandler tp.TableDataHandler, customStyles map[string]lip
 				return baseStyle
 			}
 			if rows != nil && rowIndex < len(rows) {
-				if len(rows[rowIndex]) > 1 &&
-					len(rows[rowIndex]) > col &&
+				if len(rows[rowIndex]) > col &&
 					len(rows[rowIndex]) > 1 {
 					if rows[rowIndex][1] == "Bug" {
 						return selectedStyle

@@ -20,7 +20,7 @@ func NewFormConfig(title string, fields []FormInputObject[any]) FormConfig {
 	}
 }
 
-func (f *FormConfig) GetTitle() string      { return f.Title }
+func (f *FormConfig) GetTitle() string { return f.Title }
 func (f *FormConfig) SetTitle(title string) {
 	f.Title = title
 }

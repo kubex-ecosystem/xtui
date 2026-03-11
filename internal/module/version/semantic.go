@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	manifest "github.com/kubex-ecosystem/xtui/internal/module/info"
 	"github.com/kubex-ecosystem/logz"
+	manifest "github.com/kubex-ecosystem/xtui/internal/module/info"
 	"github.com/spf13/cobra"
 )
 
