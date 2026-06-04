@@ -102,7 +102,7 @@ func (m *XTui) Init(ctx context.Context, subCmds []*cobra.Command) error {
 		return gl.Errorf("failed to trigger event %d", kbxmod.EvBoot)
 	}
 
-	gl.Infof("State machine: %d", m.FSM.Current())
+	gl.Debugf("State machine: %d", m.FSM.Current())
 	return nil
 }
 
