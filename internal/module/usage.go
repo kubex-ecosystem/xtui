@@ -1,9 +1,75 @@
 package module
 
 import (
+	"fmt"
+	"math/rand"
+	"os"
+	"strings"
+
 	"github.com/fatih/color"
+	"github.com/kubex-ecosystem/xtui/internal/module/info"
 	"github.com/spf13/cobra"
 )
+
+var banners = []string{
+	`
+ __    __ ________          ______
+|  \  |  \        \        |      \
+| ▓▓  | ▓▓\▓▓▓▓▓▓▓▓__    __ \▓▓▓▓▓▓
+ \▓▓\/  ▓▓  | ▓▓  |  \  |  \ | ▓▓
+  >▓▓  ▓▓   | ▓▓  | ▓▓  | ▓▓ | ▓▓
+ /  ▓▓▓▓\   | ▓▓  | ▓▓  | ▓▓ | ▓▓
+|  ▓▓ \▓▓\  | ▓▓  | ▓▓__/ ▓▓_| ▓▓_
+| ▓▓  | ▓▓  | ▓▓   \▓▓    ▓▓   ▓▓ \
+ \▓▓   \▓▓   \▓▓    \▓▓▓▓▓▓ \▓▓▓▓▓▓
+ %sPowered by - Kubex Ecosystem %s%s
+`,
+	`
+ __    __ ________          ______
+|  \  |  \        \        |      \
+| ▓▓  | ▓▓\▓▓▓▓▓▓▓▓__    __ \▓▓▓▓▓▓
+ \▓▓\/  ▓▓  | ▓▓  |  \  |  \ | ▓▓
+  >▓▓  ▓▓   | ▓▓  | ▓▓  | ▓▓ | ▓▓
+ /  ▓▓▓▓\   | ▓▓  | ▓▓  | ▓▓ | ▓▓
+|  ▓▓ \▓▓\  | ▓▓  | ▓▓__/ ▓▓_| ▓▓_
+| ▓▓  | ▓▓  | ▓▓   \▓▓    ▓▓   ▓▓ \
+ \▓▓   \▓▓   \▓▓    \▓▓▓▓▓▓ \▓▓▓▓▓▓
+ %sPowered by - Kubex Ecosystem %s%s
+`,
+}
+
+func GetDescriptions(descriptionArg []string, hideBanner bool) map[string]string {
+	var description, banner string
+
+	if descriptionArg != nil {
+		if strings.Contains(strings.Join(os.Args[0:], ""), "-h") {
+			description = descriptionArg[0]
+		} else {
+			description = descriptionArg[1]
+		}
+	} else {
+		description = ""
+	}
+
+	manifest, err := info.GetManifest()
+	if err != nil {
+		description += ""
+	} else {
+		if manifest.GetDescription() != "" && description == "" {
+			description = manifest.GetDescription()
+		}
+	}
+
+	if hideBanner {
+		return map[string]string{"banner": "", "description": description}
+	}
+
+	bannerRandLen := len(banners)
+	bannerRandIndex := rand.Intn(bannerRandLen)
+	banner = fmt.Sprintf(banners[bannerRandIndex], "\033[1;34m", manifest.GetVersion(), "\033[0m")
+
+	return map[string]string{"banner": banner, "description": description}
+}
 
 // colorYellow, colorGreen, colorBlue, colorRed, and colorHelp are utility functions
 // that return a string formatted with the specified color using the fatih/color package.
@@ -48,7 +114,8 @@ func hasModuleCommands(cmds []*cobra.Command) bool {
 	return false
 }
 
-func setUsageDefinition(cmd *cobra.Command) {
+// SetUsageDefinition set the usage definition for the command.
+func SetUsageDefinition(cmd *cobra.Command) {
 	cobra.AddTemplateFunc("colorYellow", colorYellow)
 	cobra.AddTemplateFunc("colorGreen", colorGreen)
 	cobra.AddTemplateFunc("colorRed", colorRed)

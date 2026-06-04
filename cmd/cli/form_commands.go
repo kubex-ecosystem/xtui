@@ -1,22 +1,42 @@
 package cli
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/kubex-ecosystem/xtui/components"
+	"github.com/kubex-ecosystem/xtui/types"
 	"github.com/kubex-ecosystem/xtui/wrappers"
+
 	"github.com/spf13/cobra"
 )
+
+func FormsRootCmd() *cobra.Command {
+	rCmd := &cobra.Command{
+		Use:     "forms",
+		Short:   "Terminal forms builder",
+		Long:    "Build terminal forms with validation, input types, and much more",
+		Aliases: []string{"f", "frm", "form"},
+		RunE:    func(cmd *cobra.Command, args []string) error { return cmd.Help() },
+	}
+
+	rCmd.AddCommand(FormsCmdsList()...)
+
+	return rCmd
+}
 
 func FormsCmdsList() []*cobra.Command {
 	inputCmd := InputFormCommand()
 	loaderCmd := LoaderFormCommand()
+	progressBarCmd := ProgressBarCmd()
 
 	return []*cobra.Command{
 		inputCmd,
 		loaderCmd,
+		progressBarCmd,
 	}
 }
 
@@ -110,7 +130,7 @@ func NavigateAndExecuteFormCommand(cmd *cobra.Command, args []string) error {
 	flags := cmd.Flags()
 
 	// Display command selection and flag definition in a form
-	formConfig := createFormConfig(commandName, flags)
+	var formConfig types.FormConfig = CreateFormConfig(commandName, flags)
 	formResult, err := components.ShowFormWithNotification(formConfig)
 	if err != nil {
 		return err
@@ -125,4 +145,51 @@ func NavigateAndExecuteFormCommand(cmd *cobra.Command, args []string) error {
 
 	// Execute the command
 	return cmd.Execute()
+}
+
+func ProgressBarCmd() *cobra.Command {
+	var file, title string
+	var ctxWithTimeout bool
+	var timeout, current, total int
+
+	cmd := &cobra.Command{
+		Use:     "progress-bar",
+		Short:   "Progress bar screen, interactive mode, for any command with flags",
+		Long:    "Progress bar screen, interactive mode, for any command with flags",
+		Aliases: []string{"pb", "progress", "formProgress", "progressForm", "formProgress", "form-progress"},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			var cancel context.CancelFunc
+			if ctxWithTimeout {
+				ctx, cancel = context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+				defer cancel()
+			}
+
+			pb := wrappers.NewKbXProgressBarModel(ctx, file, current, total, title)
+			p := tea.NewProgram(pb)
+
+			_, err := p.Run()
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVarP(&file, "file", "f", "", "Temporary file path to watch for progress updates")
+	cmd.Flags().StringVarP(&title, "title", "t", "Progresso: ", "Title or message to display above the bar")
+	cmd.Flags().IntVarP(&current, "current", "c", 0, "Current progress value")
+	cmd.Flags().IntVarP(&total, "total", "T", 100, "Total progress value")
+
+	cmd.Flags().BoolVarP(&ctxWithTimeout, "with-timeout", "w", false, "Enable context with timeout")
+	cmd.Flags().IntVar(&timeout, "timeout", 5, "Timeout duration for the context in seconds")
+
+	// Mark file as required
+	_ = cmd.MarkFlagRequired("file")
+
+	return cmd
 }

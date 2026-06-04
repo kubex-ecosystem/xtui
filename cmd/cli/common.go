@@ -13,17 +13,19 @@ import (
 
 var (
 	banners = []string{`
- __    __ ________          ______ 
+ __    __ ________          ______
 |  \  |  \        \        |      \
 | ▓▓  | ▓▓\▓▓▓▓▓▓▓▓__    __ \▓▓▓▓▓▓
- \▓▓\/  ▓▓  | ▓▓  |  \  |  \ | ▓▓  
-  >▓▓  ▓▓   | ▓▓  | ▓▓  | ▓▓ | ▓▓  
- /  ▓▓▓▓\   | ▓▓  | ▓▓  | ▓▓ | ▓▓  
-|  ▓▓ \▓▓\  | ▓▓  | ▓▓__/ ▓▓_| ▓▓_ 
+ \▓▓\/  ▓▓  | ▓▓  |  \  |  \ | ▓▓
+  >▓▓  ▓▓   | ▓▓  | ▓▓  | ▓▓ | ▓▓
+ /  ▓▓▓▓\   | ▓▓  | ▓▓  | ▓▓ | ▓▓
+|  ▓▓ \▓▓\  | ▓▓  | ▓▓__/ ▓▓_| ▓▓_
 | ▓▓  | ▓▓  | ▓▓   \▓▓    ▓▓   ▓▓ \
  \▓▓   \▓▓   \▓▓    \▓▓▓▓▓▓ \▓▓▓▓▓▓`}
 )
 
+// GetDescriptions returns a map of descriptions for a command.
+// This is useful for commands that have a lot of flags that can be passed as arguments.
 func GetDescriptions(descriptionArg []string, _ bool) map[string]string {
 	var description, banner string
 	if descriptionArg != nil {
@@ -41,14 +43,18 @@ func GetDescriptions(descriptionArg []string, _ bool) map[string]string {
 	return map[string]string{"banner": banner, "description": description}
 }
 
-func getAvailableProperties() map[string]string {
+// GetAvailableProperties returns a map of available properties.
+// This is useful for commands that have a lot of flags that can be passed as arguments.
+func GetAvailableProperties() map[string]string {
 	return map[string]string{
 		"property1": "value1",
 		"property2": "value2",
 	}
 }
 
-func adaptArgsToProperties(args []string, properties map[string]string) []string {
+// AdaptArgsToProperties adapts a list of arguments to a list of properties.
+// This is useful for commands that have a lot of flags that can be passed as arguments.
+func AdaptArgsToProperties(args []string, properties map[string]string) []string {
 	adaptedArgs := args
 	for key, value := range properties {
 		adaptedArgs = append(adaptedArgs, fmt.Sprintf("--%s=%s", key, value))
@@ -56,7 +62,8 @@ func adaptArgsToProperties(args []string, properties map[string]string) []string
 	return adaptedArgs
 }
 
-func createFormConfig(commandName string, flags *pflag.FlagSet) t.FormConfig {
+// CreateFormConfig create a form config for a command and its flags.
+func CreateFormConfig(commandName string, flags *pflag.FlagSet) t.FormConfig {
 	var formFields []t.FormInputObject[any]
 
 	flags.VisitAll(func(flag *pflag.Flag) {

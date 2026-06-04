@@ -4,7 +4,10 @@ package info
 import (
 	_ "embed"
 	"encoding/json"
-	"fmt"
+	"os"
+
+	gl "github.com/kubex-ecosystem/logz"
+	// "github.com/kubex-ecosystem/xtui/internal/module/info"
 )
 
 //go:embed manifest.json
@@ -62,7 +65,12 @@ func (m *mmanifest) GetRepository() string  { return m.Repository }
 func (m *mmanifest) GetHomepage() string    { return m.Homepage }
 func (m *mmanifest) GetDescription() string { return m.Description }
 func (m *mmanifest) GetMain() string        { return m.Main }
-func (m *mmanifest) GetBin() string         { return m.Bin }
+func (m *mmanifest) GetBin() string {
+	if m.Bin == "" {
+		m.Bin, _ = os.Executable()
+	}
+	return m.Bin
+}
 func (m *mmanifest) GetAuthor() string      { return m.Author }
 func (m *mmanifest) GetLicense() string     { return m.License }
 func (m *mmanifest) GetKeywords() []string  { return m.Keywords }
@@ -82,12 +90,12 @@ func GetManifest() (Manifest, error) {
 	}
 
 	if len(manifestJSONData) == 0 {
-		return nil, fmt.Errorf("manifest.json: embed is empty")
+		return nil, gl.Errorf("manifest.json: embed is empty")
 	}
 
 	var m mmanifest
 	if err := json.Unmarshal(manifestJSONData, &m); err != nil {
-		return nil, fmt.Errorf("manifest.json: %w", err)
+		return nil, gl.Errorf("manifest.json: %v", err)
 	}
 	cachedManifest = &m
 	return &m, nil
@@ -98,37 +106,32 @@ type FS interface {
 	ReadFile(name string) ([]byte, error)
 }
 
-func LoadFromFS(fs FS) (Manifest, Control, error) {
+// LoadFromFS lazy, sem init() com side-effects
+// TODO: o que acontece se não achar? deve dar erro? ou criar um default?
+// De acordo com o pacote control, o control deve ser criado em cada módulo.
+// Apenas o xtui (app) não cria um control.json
+func LoadFromFS(fs FS) (
+	Manifest, // Manifest is the default. But can be other implementations
+	*Control, // ControlIface is the interface that the Control implements. We return a pointer to Control because it has side effects when it is loaded
+	error,
+) {
 	var m Manifest
 	var c Control
+
 	if b, err := fs.ReadFile("manifest.json"); err == nil {
 		if err := json.Unmarshal(b, &m); err != nil {
-			return nil, Control{}, fmt.Errorf("manifest.json: %w", err)
+			return nil, nil, gl.Errorf("manifest.json: %v", err)
 		}
 	} else {
-		return nil, Control{}, fmt.Errorf("manifest.json: %w", err)
+		return nil, nil, gl.Errorf("manifest.json: %v", err)
 	}
 	if b, err := fs.ReadFile("control.json"); err == nil {
 		if err := json.Unmarshal(b, &c); err != nil {
-			return nil, Control{}, fmt.Errorf("control.json: %w", err)
+			return m, &c, gl.Errorf("control.json: %v", err)
 		}
 	} else {
-		return nil, Control{}, fmt.Errorf("control.json: %w", err)
+		return m, nil, gl.Errorf("control.json: %v", err)
 	}
-	return m, c, nil
-}
 
-// func GetControl() (*Control, error) {
-// 	if cachedControl != nil {
-// 		return cachedControl, nil
-// 	}
-// 	var c Control
-// 	if len(controlJSONData) == 0 {
-// 		return nil, fmt.Errorf("control.json: embed is empty")
-// 	}
-// 	if err := json.Unmarshal(controlJSONData, &c); err != nil {
-// 		return nil, fmt.Errorf("control.json: %w", err)
-// 	}
-// 	cachedControl = &c
-// 	return &c, nil
-// }
+	return m, &c, nil
+}

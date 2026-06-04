@@ -2,11 +2,11 @@
 # shellcheck disable=SC2005
 
 # set -o posix
-set -o nounset  # Treat unset variables as an error
-set -o errexit  # Exit immediately if a command exits with a non-zero status
-set -o pipefail # Prevent errors in a pipeline from being masked
-set -o errtrace # If a command fails, the shell will exit immediately
-set -o functrace # If a function fails, the shell will exit immediately
+set -o nounset           # Treat unset variables as an error
+set -o errexit           # Exit immediately if a command exits with a non-zero status
+set -o pipefail          # Prevent errors in a pipeline from being masked
+set -o errtrace          # If a command fails, the shell will exit immediately
+set -o functrace         # If a function fails, the shell will exit immediately
 shopt -s inherit_errexit # Inherit the errexit option in functions
 IFS=$'\n\t'
 
@@ -62,12 +62,11 @@ _BINARY="${_BUILD_PATH:-}/${_APP_NAME:-}"
 _LOCAL_BIN="${HOME:-"~"}/.local/bin"
 _GLOBAL_BIN="/usr/local/bin"
 
-_SCRIPT_DIR="$(cd "$(dirname "${0:-${BASH_SOURCE[0]}}")" && pwd)"
+_SCRIPT_DIR="$(realpath "${_ROOT_DIR:-$(git rev-parse --show-toplevel)}/support")"
 __source_script_if_needed "apply_manifest" "${_SCRIPT_DIR:-}/apply_manifest.sh" || exit 1
 __source_script_if_needed "get_current_shell" "${_SCRIPT_DIR:-}/utils.sh" || exit 1
 
-
-if [[ -z "${_ROOT_DIR:-}" || -z "${_APP_NAME:-}" || -z "${_DESCRIPTION:-}" || -z "${_OWNER:-}" || -z "${_OWNER:-}" || -z "${_BINARY_NAME:-}" || -z "${_PROJECT_NAME:-}" || -z "${_AUTHOR:-}" || -z "${_VERSION:-}" || -z "${_LICENSE:-}" || -z "${_REPOSITORY:-}" || -z "${_PRIVATE_REPOSITORY:-}" || -z "${_VERSION_GO:-}" ]]; then
+if [[ -z ${_ROOT_DIR:-} || -z ${_APP_NAME:-} || -z ${_DESCRIPTION:-} || -z ${_OWNER:-} || -z ${_OWNER:-} || -z ${_BINARY_NAME:-} || -z ${_PROJECT_NAME:-} || -z ${_AUTHOR:-} || -z ${_VERSION:-} || -z ${_LICENSE:-} || -z ${_REPOSITORY:-} || -z ${_PRIVATE_REPOSITORY:-} || -z ${_VERSION_GO:-} ]]; then
   apply_manifest "$@" || return 1
 fi
 
@@ -95,7 +94,7 @@ show_about() {
   License: ${_LICENSE:-}
   Organization: https://github.com/${_OWNER:-}"
 
-  if [[ "${_QUIET:-false}" == "true" ]]; then
+  if [[ ${_QUIET:-false} == "true" ]]; then
     # _about_origin=""
     _about_repo=""
   fi
@@ -104,7 +103,7 @@ show_about() {
 ${_about_origin:-}
 ${_about_repo:-}"
 
-  if [[ "${_HIDE_ABOUT:-false}" == "true" ]]; then
+  if [[ ${_HIDE_ABOUT:-false} == "true" ]]; then
     _about=""
   fi
 
@@ -118,7 +117,7 @@ ${_about_repo:-}"
 }
 
 show_banner() {
-  if [[ "${_QUIET:-false}" != "true" && "${_HIDE_BANNER:-false}" != "true" ]]; then
+  if [[ ${_QUIET:-false} != "true" && ${_HIDE_BANNER:-false} != "true" ]]; then
     printf '%s\n' "#####################################################
 
                ██   ██ ██     ██ ██████   ████████ ██     ██

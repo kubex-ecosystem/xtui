@@ -4,13 +4,11 @@
   "version": "1.3.3",
   "private": false,
   "published": true,
-  "aliases": [
-    "xtui"
-  ],
+  "aliases": ["xtui"],
   "repository": "https://github.com/kubex-ecosystem/xtui",
   "homepage": "https://github.com/kubex-ecosystem/xtui",
   "description": "Kubex - XTUI is a command-line tool for managing, creating and interacting with terminal user interfaces.",
-  "go_version": "1.26.1",
+  "go_version": "1.26.3",
   "main": "cmd/main.go",
   "bin": "xtui",
   "author": "Rafael Mori <faelmori@gmail.com>",
@@ -25,23 +23,10 @@
     "tool",
     "management"
   ],
-  "platforms": [
-    "linux/amd64",
-    "linux/arm64",
-    "linux/386",
-    "darwin/amd64",
-    "darwin/arm64",
-    "windows/amd64",
-    "windows/386"
-  ],
-  "dependencies": [
-    "tar",
-    "gzip",
-    "curl",
-    "git",
-    "zip",
-    "unzip",
-    "jq",
-    "upx"
-  ]
+  "platforms": ["linux/amd64", "darwin/amd64", "darwin/arm64", "windows/amd64"],
+  "dependencies": ["tar", "gzip", "curl", "git", "zip", "unzip", "jq", "upx"],
+
+  "healthcheck_type": "none",
+  "healthcheck_url": "",
+  "healthcheck_cmd": ""
 }

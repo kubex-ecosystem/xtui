@@ -20,6 +20,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func ViewsRootCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "viewer",
+		Aliases: []string{"view", "v"},
+		Short:   "Terminal features viewer",
+		Long:    "View terminal features like logs, network status, and much more",
+		RunE:    func(cmd *cobra.Command, args []string) error { return cmd.Help() },
+	}
+
+	cmd.AddCommand(ViewsCmdsList()...)
+
+	return cmd
+}
+
 func ViewsCmdsList() []*cobra.Command {
 	tableCmd := tableViewCmd()
 

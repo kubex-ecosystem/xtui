@@ -16,10 +16,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var gl = logz.GetLoggerZ("XTUI")
+var gl = logz.GetLoggerZ("github.com/kubex-ecosystem/xtui.module.version")
 var (
 	info manifest.Manifest
-	vrs  Service
+	vrs  *ServiceImpl
 	err  error
 )
 
@@ -32,24 +32,6 @@ func init() {
 	}
 }
 
-type Service interface {
-	// GetLatestVersion retrieves the latest version from the Git repository.
-	GetLatestVersion() (string, error)
-	// GetCurrentVersion returns the current version of the service.
-	GetCurrentVersion() string
-	// IsLatestVersion checks if the current version is the latest version.
-	IsLatestVersion() (bool, error)
-	// GetName returns the name of the service.
-	GetName() string
-	// GetVersion returns the current version of the service.
-	GetVersion() string
-	// GetRepository returns the Git repository URL of the service.
-	GetRepository() string
-	// setLastCheckedAt sets the last checked time for the version.
-	setLastCheckedAt(time.Time)
-	// updateLatestVersion updates the latest version from the Git repository.
-	updateLatestVersion() error
-}
 type ServiceImpl struct {
 	manifest.Manifest
 	gitModelURL    string
@@ -75,7 +57,7 @@ func getLatestTag(repoURL string) (string, error) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			gl.Log("error", "Recovered from panic in getLatestTag: %v", rec)
-			err = fmt.Errorf("panic occurred while fetching latest tag: %v", rec)
+			err = gl.Errorf("panic occurred while fetching latest tag: %v", rec)
 		}
 	}()
 
@@ -83,24 +65,24 @@ func getLatestTag(repoURL string) (string, error) {
 		if vrs == nil {
 			vrs = NewVersionService()
 		}
-		vrs.setLastCheckedAt(time.Now())
+		setLastCheckedAt(vrs, time.Now())
 	}()
 
 	if info == nil {
 		var err error
 		info, err = manifest.GetManifest()
 		if err != nil {
-			return "", fmt.Errorf("failed to get manifest: %w", err)
+			return "", gl.Errorf("failed to get manifest: %v", err)
 		}
 	}
 	if info.IsPrivate() {
-		return "", fmt.Errorf("cannot fetch latest tag for private repositories")
+		return "", gl.Errorf("cannot fetch latest tag for private repositories")
 	}
 
 	if repoURL == "" {
 		repoURL = info.GetRepository()
 		if repoURL == "" {
-			return "", fmt.Errorf("repository URL is not set")
+			return "", gl.Errorf("repository URL is not set")
 		}
 	}
 
@@ -114,7 +96,7 @@ func getLatestTag(repoURL string) (string, error) {
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to fetch tags: %s", resp.Status)
+		return "", gl.Errorf("failed to fetch tags: %s", resp.Status)
 	}
 	type Tag struct {
 		Name string `json:"name"`
@@ -124,7 +106,7 @@ func getLatestTag(repoURL string) (string, error) {
 	// This assumes the API returns a JSON array of tags.
 	// Adjust the decoding logic based on the actual API response structure.
 	if resp.Header.Get("Content-Type") != "application/json" {
-		return "", fmt.Errorf("expected application/json, got %s", resp.Header.Get("Content-Type"))
+		return "", gl.Errorf("expected application/json, got %s", resp.Header.Get("Content-Type"))
 	}
 
 	var tags []Tag
@@ -133,13 +115,13 @@ func getLatestTag(repoURL string) (string, error) {
 	}
 
 	if len(tags) == 0 {
-		return "", fmt.Errorf("no tags found")
+		return "", gl.Errorf("no tags found")
 	}
 	return tags[0].Name, nil
 }
 func (v *ServiceImpl) updateLatestVersion() error {
 	if info.IsPrivate() {
-		return fmt.Errorf("cannot fetch latest version for private repositories")
+		return gl.Errorf("cannot fetch latest version for private repositories")
 	}
 	repoURL := strings.TrimSuffix(v.gitModelURL, ".git")
 	tag, err := getLatestTag(repoURL)
@@ -194,7 +176,7 @@ func (v *ServiceImpl) parseVersion(versionToParse string) []int {
 }
 func (v *ServiceImpl) IsLatestVersion() (bool, error) {
 	if info.IsPrivate() {
-		return false, fmt.Errorf("cannot check version for private repositories")
+		return false, gl.Errorf("cannot check version for private repositories")
 	}
 	if v.latestVersion == "" {
 		if err := v.updateLatestVersion(); err != nil {
@@ -206,18 +188,18 @@ func (v *ServiceImpl) IsLatestVersion() (bool, error) {
 	latestVersionParts := v.parseVersion(v.latestVersion)
 
 	if len(currentVersionParts) == 0 || len(latestVersionParts) == 0 {
-		return false, fmt.Errorf("invalid version format")
+		return false, gl.Errorf("invalid version format")
 	}
 
 	if len(currentVersionParts) != len(latestVersionParts) {
-		return false, fmt.Errorf("version parts length mismatch")
+		return false, gl.Errorf("version parts length mismatch")
 	}
 
 	return v.versionAtMost(currentVersionParts, latestVersionParts)
 }
 func (v *ServiceImpl) GetLatestVersion() (string, error) {
 	if info.IsPrivate() {
-		return "", fmt.Errorf("cannot fetch latest version for private repositories")
+		return "", gl.Errorf("cannot fetch latest version for private repositories")
 	}
 	if v.latestVersion == "" {
 		if err := v.updateLatestVersion(); err != nil {
@@ -250,18 +232,22 @@ func (v *ServiceImpl) GetRepository() string {
 	}
 	return info.GetRepository()
 }
-func (v *ServiceImpl) setLastCheckedAt(t time.Time) {
+func setLastCheckedAt(v *ServiceImpl, t time.Time) {
 	v.lastCheckedAt = t
 	gl.Log("debug", "Last checked at: "+t.Format(time.RFC3339))
 }
 
-func NewVersionService() Service {
-	return &ServiceImpl{
+func NewVersionService() *ServiceImpl {
+	if vrs != nil {
+		return vrs
+	}
+	vrs = &ServiceImpl{
 		Manifest:       info,
 		gitModelURL:    info.GetRepository(),
 		currentVersion: info.GetVersion(),
 		latestVersion:  "",
 	}
+	return vrs
 }
 
 var (
@@ -338,7 +324,7 @@ func init() {
 						gl.Log("info", "Current version: "+vrs.GetCurrentVersion())
 						gl.Log("info", "Latest version: "+latestVersion)
 					}
-					vrs.setLastCheckedAt(time.Now())
+					setLastCheckedAt(vrs, time.Now())
 				}
 			},
 		}

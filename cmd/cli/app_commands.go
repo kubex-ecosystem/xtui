@@ -10,6 +10,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func AppsRootCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "app",
+		Short:   "Application management",
+		Long:    "Application installation, removal, and management with friendly UI and much more",
+		Aliases: []string{"application", "applications"},
+		RunE:    func(cmd *cobra.Command, args []string) error { return cmd.Help() },
+	}
+
+	cmd.AddCommand(AppsCmdsList()...)
+
+	return cmd
+}
+
 func AppsCmdsList() []*cobra.Command {
 	return []*cobra.Command{
 		InstallApplicationsCommand(),
@@ -39,9 +53,9 @@ func InstallApplicationsCommand() *cobra.Command {
 			newArgs := []string{strings.Join(depList, " "), path, fmt.Sprintf("%t", yes), fmt.Sprintf("%t", quiet)}
 			args = append(args, newArgs...)
 
-			availableProperties := getAvailableProperties()
+			availableProperties := GetAvailableProperties()
 			if len(availableProperties) > 0 {
-				adaptedArgs := adaptArgsToProperties(args, availableProperties)
+				adaptedArgs := AdaptArgsToProperties(args, availableProperties)
 				return wp.InstallDependenciesWithUI(adaptedArgs...)
 			}
 
@@ -77,7 +91,7 @@ func NavigateAndExecuteCommand(cmd *cobra.Command, args []string) error {
 	flags := cmd.Flags()
 
 	// Display command selection and flag definition in a form
-	formConfig := createFormConfig(commandName, flags)
+	formConfig := CreateFormConfig(commandName, flags)
 	formResult, err := cp.ShowFormWithNotification(formConfig)
 	if err != nil {
 		return err

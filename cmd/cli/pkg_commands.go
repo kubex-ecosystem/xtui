@@ -12,6 +12,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func PkgRootCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "pkg",
+		Short:   "Package management",
+		Long:    "Package installation, removal, and management with friendly UI and much more",
+		Aliases: []string{"package", "packages"},
+		RunE:    func(cmd *cobra.Command, args []string) error { return cmd.Help() },
+	}
+
+	cmd.AddCommand(PkgCmdsList()...)
+
+	return cmd
+}
+
 // appsCmdsList retorna uma lista de comandos Cobra relacionados a aplicativos.
 // Retorna um slice de ponteiros para comandos Cobra e um erro, se houver.
 
@@ -46,9 +60,9 @@ func appsCmdAdd() *cobra.Command {
 			newArgs := []string{strings.Join(nameFlagValue, " "), pathFlagValue, fmt.Sprintf("%t", yesFlagValue), fmt.Sprintf("%t", quietFlagValue)}
 			args = append(args, newArgs...)
 
-			availableProperties := getAvailableProperties()
+			availableProperties := GetAvailableProperties()
 			if len(availableProperties) > 0 {
-				adaptedArgs := adaptArgsToProperties(args, availableProperties)
+				adaptedArgs := AdaptArgsToProperties(args, availableProperties)
 				return p.InstallApps(adaptedArgs...)
 			}
 

@@ -2,18 +2,108 @@
 package module
 
 import (
-	gl "github.com/kubex-ecosystem/logz"
-	"github.com/kubex-ecosystem/xtui/cmd/cli"
-	"github.com/kubex-ecosystem/xtui/internal/module/version"
-	"github.com/spf13/cobra"
-
+	"context"
 	"os"
 	"strings"
+
+	flow "github.com/kubex-ecosystem/ethyr/tools/flow"
+	control "github.com/kubex-ecosystem/ethyr/tools/flow/control"
+	fsm "github.com/kubex-ecosystem/ethyr/tools/flow/fsm"
+	gl "github.com/kubex-ecosystem/logz"
+
+	kbxmod "github.com/kubex-ecosystem/xtui/internal/module/kbx"
+	"github.com/kubex-ecosystem/xtui/internal/module/version"
+
+	"github.com/spf13/cobra"
 )
 
 // XTui representa a estrutura do módulo ui.
 type XTui struct {
+	*flow.Flow
+
+	engine  *flow.Engine[fsm.State]
+	pass    flow.Pass[fsm.State]
+	control *control.ManagerControl[control.StepFlag]
+
+	Command *cobra.Command
+
 	HideBanner bool
+	Debug      bool
+}
+
+func NewXTui(ctx context.Context, cfg kbxmod.InitArgs) *XTui {
+	x := &XTui{
+		Flow:       flow.NewFlow(),
+		HideBanner: cfg.HideBanner,
+	}
+
+	x.Command = &cobra.Command{
+		Use:         x.Module(),
+		Short:       x.ShortDescription(),
+		Aliases:     []string{x.Alias()},
+		Example:     x.concatenateExamples(),
+		Annotations: GetDescriptions([]string{x.ShortDescription(), x.LongDescription()}, x.HideBanner),
+	}
+
+	SetUsageDefinition(x.Command)
+
+	x.Command.PersistentFlags().BoolVarP(&x.HideBanner, "hide-banner", "H", false, "Hide/disable the ASCII banner.")
+	x.Command.PersistentFlags().BoolVarP(&x.Debug, "debug", "D", false, "Enable debug mode.")
+
+	return x
+}
+
+// Init initializes the module
+func (m *XTui) Init(ctx context.Context, subCmds []*cobra.Command) error {
+	gl.Debugf("Creating command for XTuI with flags: %v", os.Args)
+
+	SetUsageDefinition(m.Command)
+
+	for _, cmd := range subCmds {
+		if cmd != nil {
+			SetUsageDefinition(cmd)
+			for _, subCmd := range cmd.Commands() {
+				if subCmd != nil {
+					SetUsageDefinition(subCmd)
+					if len(subCmd.Annotations) == 0 {
+						subCmd.Annotations = GetDescriptions([]string{subCmd.Short, subCmd.Long}, m.HideBanner)
+						if !strings.Contains(strings.Join(os.Args, " "), subCmd.Use) {
+							if subCmd.Short == "" {
+								subCmd.Short = subCmd.Annotations["description"]
+							}
+						}
+					}
+				}
+			}
+			m.Command.AddCommand(cmd)
+		}
+	}
+
+	// Set initial state
+	if m.FSM == nil {
+		m.FSM = fsm.NewFSM(kbxmod.XTUIIdle, []fsm.Transition{
+			{From: kbxmod.XTUIIdle, Event: kbxmod.EvBoot, To: kbxmod.XTUIBootstrapping},
+			{From: kbxmod.XTUIBootstrapping, Event: kbxmod.EvConfigure, To: kbxmod.XTUIConfiguring},
+			{From: kbxmod.XTUIConfiguring, Event: kbxmod.EvRead, To: kbxmod.XTUIReading},
+			{From: kbxmod.XTUIReading, Event: kbxmod.EvProcess, To: kbxmod.XTUIProcessing},
+			{From: kbxmod.XTUIProcessing, Event: kbxmod.EvWait, To: kbxmod.XTUIWaiting},
+			{From: kbxmod.XTUIWaiting, Event: kbxmod.EvStop, To: kbxmod.XTUIStopping},
+		})
+	}
+
+	// Set initial state flag
+	if !m.FSM.Can(kbxmod.EvBoot) {
+		return gl.Errorf("failed to trigger event %d", kbxmod.EvBoot)
+	}
+
+	// Transição para estado inicial
+	gl.Debugf("Triggering event %d", kbxmod.EvBoot)
+	if !m.FSM.Trigger(kbxmod.EvBoot) {
+		return gl.Errorf("failed to trigger event %d", kbxmod.EvBoot)
+	}
+
+	gl.Infof("State machine: %d", m.FSM.Current())
+	return nil
 }
 
 // Alias retorna o alias do módulo ui.
@@ -53,7 +143,11 @@ func (m *XTui) Module() string {
 
 // Execute executa o comando especificado para o módulo ui.
 func (m *XTui) Execute() error {
-	return m.Command().Execute()
+	if m.Command == nil {
+		return nil
+	}
+
+	return m.Command.Execute()
 }
 
 // concatenateExamples concatena os exemplos de uso do módulo.
@@ -66,88 +160,23 @@ func (m *XTui) concatenateExamples() string {
 }
 
 // Command retorna o comando cobra para o módulo.
-func (m *XTui) Command() *cobra.Command {
+func (m *XTui) loadCommands(cmd *cobra.Command, cms []*cobra.Command) {
 	gl.GetLogger("XTuI")
 
-	gl.Debugf("Creating command for XTuI with flags: %v", os.Args)
-
-	c := &cobra.Command{
-		Use:         m.Module(),
-		Aliases:     []string{m.Alias()},
-		Example:     m.concatenateExamples(),
-		Annotations: cli.GetDescriptions([]string{m.ShortDescription(), m.LongDescription()}, false),
-	}
-
-	// Adiciona os comandos relacionados ao módulo
-
-	pkgCmdRoot := &cobra.Command{
-		Use:     "pkg",
-		Aliases: []string{"package", "packages"},
-		Annotations: cli.GetDescriptions(
-			[]string{
-				"Package management",
-				"Package installation, removal, and management with friendly UI and much more",
-			}, false,
-		),
-		RunE: func(cmd *cobra.Command, args []string) error { return cmd.Help() },
-	}
-	pkgCmdRoot.AddCommand(cli.PkgCmdsList()...)
-	c.AddCommand(pkgCmdRoot)
-
-	appCmdRoot := &cobra.Command{
-		Use:     "deps",
-		Aliases: []string{"dep", "dependencies"},
-		Annotations: cli.GetDescriptions(
-			[]string{
-				"Dependencies management",
-				"Install, remove, and manage dependencies with friendly UI and much more",
-			}, false,
-		),
-		RunE: func(cmd *cobra.Command, args []string) error { return cmd.Help() },
-	}
-	appCmdRoot.AddCommand(cli.AppsCmdsList()...)
-	c.AddCommand(appCmdRoot)
-
-	formCmdRoot := &cobra.Command{
-		Use:     "forms",
-		Aliases: []string{"frm", "form"},
-		Annotations: cli.GetDescriptions(
-			[]string{
-				"Terminal forms builder",
-				"Build terminal forms with validation, input types, and much more",
-			}, false,
-		),
-		RunE: func(cmd *cobra.Command, args []string) error { return cmd.Help() },
-	}
-	formCmdRoot.AddCommand(cli.FormsCmdsList()...)
-	c.AddCommand(formCmdRoot)
-
-	dataCmdRoot := &cobra.Command{
-		Use:     "viewer",
-		Aliases: []string{"view", "v"},
-		Annotations: cli.GetDescriptions(
-			[]string{
-				"Terminal features viewer",
-				"View terminal features like logs, network status, and much more",
-			}, false,
-		),
-		RunE: func(cmd *cobra.Command, args []string) error { return cmd.Help() },
-	}
-	dataCmdRoot.AddCommand(cli.ViewsCmdsList()...)
-	c.AddCommand(dataCmdRoot)
-
-	c.AddCommand(version.CliCommand())
+	cmd.Annotations = GetDescriptions([]string{cmd.Short, cmd.Long}, m.HideBanner)
 
 	// Set usage definitions for the command and its subcommands
-	setUsageDefinition(c)
-	for _, subCmd := range c.Commands() {
-		setUsageDefinition(c)
+	SetUsageDefinition(cmd)
+	for _, subCmd := range cms {
+		SetUsageDefinition(subCmd)
 		if !strings.Contains(strings.Join(os.Args, " "), subCmd.Use) {
 			if subCmd.Short == "" {
 				subCmd.Short = subCmd.Annotations["description"]
 			}
 		}
 	}
+}
 
-	return c
+func (m *XTui) Version() kbxmod.VersionService {
+	return version.NewVersionService()
 }
