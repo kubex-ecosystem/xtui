@@ -15,7 +15,7 @@ __kbx_DmsShUGFnSrc_iterator() {
 
     local _error=""
 
-    local _fn_tmp_val=$(readlink -f "$(printf '/%s\n' "$(command -V "${_ARR_FN[$_fn_idx]}" 2>/dev/null | cut --delimiter='/' -f2-)" 2>/dev/null | grep -i '/' | grep -vE 'not|found')") || {
+    local _fn_tmp_val=$(readlink -f "$(printf '/%s\n' "$(command -V "${_ARR_FN[$_fn_idx]}" 2>/dev/null | cut --delimiter='/' -f2-)" 2>/dev/null | grep -i '/' | grep -vE 'not|found|is an autoload shell function')") || {
       _error="$?"
       kbx_log error "Error: Could not get fn source for: ${_ARR_FN[$_fn_idx]:-}"
     }
