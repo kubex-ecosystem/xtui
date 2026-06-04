@@ -150,8 +150,10 @@ __kbx_DmsShUGFnSrc() {
   fi
 
   if ps -p ${_iter_pid:-} >/dev/null 2>&1; then
-
-    kill ${_iter_pid:-%} 2>/dev/null || true
+    wait ${_iter_pid} || {
+      kbx_log error "Failed to wait for fn source iteration." true
+      return 1
+    }
   fi
 
   return 0
