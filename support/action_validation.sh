@@ -12,12 +12,12 @@ _SOURCED=false
 ensure_marker() {
   local MARKER_PATH="${1:-}"
   if [[ -z "$MARKER_PATH" ]]; then
-    printf '%s\n' "❌ Marker path is not set. Cannot proceed."
+    printf '%s\n' "Marker path is not set. Cannot proceed."
     return 1
   fi
   if [[ ! -f "$MARKER_PATH" ]]; then
     touch "$MARKER_PATH" || {
-      printf '%s\n' "❌ Failed to create marker file: $MARKER_PATH"
+      printf '%s\n' "Failed to create marker file: $MARKER_PATH"
       return 1
     }
     chmod 644 "$MARKER_PATH"
@@ -47,7 +47,7 @@ get_git_tag(){
     TAG="$(get_tag_remote_git)"
   fi
   if [[ "$TAG" == "v0.0.0" ]]; then
-    printf '%s\n' "❌ No valid tag found. Please ensure you have tags in your repository."
+    printf '%s\n' "No valid tag found. Please ensure you have tags in your repository."
     exit 1
   fi
   printf '%s\n' "$TAG"
@@ -77,7 +77,7 @@ parse_vars(){
   # Check if the marker directory is set and exists
   if [[ ! -d "${MARKER_DIR:-}" ]]; then
     mkdir -p "${MARKER_DIR:-}" && chmod 755 "${MARKER_DIR:-}" || {
-      printf '%s\n' "❌ Failed to create marker directory: ${MARKER_DIR:-}"
+      printf '%s\n' "Failed to create marker directory: ${MARKER_DIR:-}"
       return 1
     }
   fi
@@ -113,7 +113,7 @@ parse_vars(){
     ["is_fork"]="${5:-"${IS_FORK:-"$(git config --get remote.origin.url | grep -q 'fork' && echo "true" || echo "false")"}"}"
     ["ref"]="${6:-"${REF:-${GITHUB_REF:-"refs/tags/v0.0.0"}}"}"
   )
-  
+
   # Get MARKER's directory and absolute path for current repo based on the version hash and version
   MARKER_NAME=".kubex_publish_marker_${_ARGS_LIST["version"]}_${_ARGS_LIST["version_hash"]}"
   MARKER_PATH="${MARKER_DIR}/${MARKER_NAME}"
@@ -123,40 +123,40 @@ parse_vars(){
     # Check if actor is in contributors
     # shellcheck disable=SC2076
     if [[ ! " $CONTRIBUTORS " =~ " $ACTOR " ]]; then
-      printf '%s\n' "❌ Actor '$ACTOR' is not an authorized contributor."
+      printf '%s\n' "Actor '$ACTOR' is not an authorized contributor."
       return 1
     fi
     # Check event type and repository fork status
     if [[ -z "$EVENT" ]]; then
-      printf '%s\n' "❌ EVENT is not set. Cannot proceed."
+      printf '%s\n' "EVENT is not set. Cannot proceed."
       return 1
     fi
     # Check if the event is a push or workflow_dispatch
     if [[ "$EVENT" != "push" && "$EVENT" != "workflow_dispatch" ]]; then
-      printf '%s\n' "❌ Only 'push' or manual dispatch allowed. Got '$EVENT'."
+      printf '%s\n' "Only 'push' or manual dispatch allowed. Got '$EVENT'."
       return 1
     fi
     # Check if the repository is a fork
     if [[ "$IS_FORK" == "true" ]]; then
-      printf '%s\n' "❌ Workflow cannot run from a fork."
+      printf '%s\n' "Workflow cannot run from a fork."
       return 1
     fi
     # Check if the ref who triggered the workflow
     if [[ -z "$REF" ]]; then
-      printf '%s\n' "❌ REF is not set. Cannot proceed."
+      printf '%s\n' "REF is not set. Cannot proceed."
       return 1
     fi
     # Check if the ref is a tag and matches the semver format
     if [[ ! "$REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-      printf '%s\n' "❌ Tag does not match semver format: $REF"
+      printf '%s\n' "Tag does not match semver format: $REF"
       return 1
     fi
     # Check if the version is set
     if [[ -z "$VERSION" ]]; then
-      printf '%s\n' "❌ Version is not set. Cannot proceed."
+      printf '%s\n' "Version is not set. Cannot proceed."
       return 1
     fi
-    
+
     return 0
   }
 
@@ -188,7 +188,7 @@ parse_vars(){
         # and inform the user
         if [ $COUNT -ge 2 ]; then
           WILL_PROCEED=false
-          printf '%s\n' "❌ Publish marker count for ${VERSION} has reached $COUNT executions. Aborting deployment."
+          printf '%s\n' "Publish marker count for ${VERSION} has reached $COUNT executions. Aborting deployment."
           printf '%s\n' "Please check the marker file: ${MARKER_PATH}"
           printf '%s\n' "If you want to reset the count, please remove the marker file manually."
         else
@@ -197,18 +197,18 @@ parse_vars(){
       else
         WILL_PROCEED=true
       fi
-    else 
+    else
       WILL_PROCEED=true
     fi
 
     if test "$WILL_PROCEED" = true; then
       # Log the deployment proceeding
-      printf '%s\n' "✅ Proceeding with deployment for version ${VERSION}."
+      printf '%s\n' "Proceeding with deployment for version ${VERSION}."
 
       # Ensure the marker file exists
       # and create/set the initial count if it doesn't exist
       ensure_marker "${MARKER_PATH}" || {
-        printf '%s\n' "❌ Failed to ensure marker file: ${MARKER_PATH}"
+        printf '%s\n' "Failed to ensure marker file: ${MARKER_PATH}"
         return 1
       }
 
@@ -232,8 +232,8 @@ parse_vars(){
           # Increment the count
           COUNT=$((COUNT + 1))
         fi
-      else 
-        printf '%s\n' "❌ Error ensuring marker file: ${MARKER_PATH}"
+      else
+        printf '%s\n' "Error ensuring marker file: ${MARKER_PATH}"
         return 1
       fi
 
@@ -252,7 +252,7 @@ parse_vars(){
       git commit -m "add publish marker for version ${VERSION}, count: ${COUNT}" || true
       git push origin HEAD:main
     else
-      printf '%s\n' "❌ Deployment will not proceed due to marker validation failure."
+      printf '%s\n' "Deployment will not proceed due to marker validation failure."
       return 1
     fi
 
@@ -261,12 +261,12 @@ parse_vars(){
 
   # Validate the context variables in the shared scope
   validate_context || {
-    printf '%s\n' "❌ Context validation failed. Cannot proceed."
+    printf '%s\n' "Context validation failed. Cannot proceed."
     return 1
   }
 
   validate_marker || {
-    printf '%s\n' "❌ Marker validation failed. Cannot proceed."
+    printf '%s\n' "Marker validation failed. Cannot proceed."
     return 1
   }
 }
@@ -285,18 +285,18 @@ main () {
   # Check if the script is run with arguments in enlaced mode
   # If no arguments are provided, print usage and return an error
   if [[ $# -eq 0 ]]; then
-    printf '%s\n' "❌ No arguments provided."
+    printf '%s\n' "No arguments provided."
     printf '%s\n' "Usage: $0 <version> <will_proceed> <marker> <count>"
     return 1
-  else 
+  else
     args=("$@")
   fi
 
   # Shift all arguments to the left, leaving an empty array
-  shift $(( $# )) 
+  shift $(( $# ))
 
   declare -a _cmd=(
-    validate_marker 
+    validate_marker
     "${args[@]}"
   )
 
@@ -310,7 +310,7 @@ main () {
     fi
 
     "${_cmd[@]}" || {
-      printf '%s\n' "❌ Error: Validation failed."
+      printf '%s\n' "Error: Validation failed."
       return 1
     }
   else

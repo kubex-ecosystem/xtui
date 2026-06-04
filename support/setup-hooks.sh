@@ -173,7 +173,7 @@ _install_pre_commit_tools() {
     echo '.venv-hooks' >> .gitignore
   fi
   if [[ ! -f .venv-hooks/bin/activate ]]; then
-    echo "❌ Falha ao encontrar o ambiente virtual em .venv-hooks"
+    echo "Falha ao encontrar o ambiente virtual em .venv-hooks"
     exit 1
   fi
 
@@ -204,7 +204,7 @@ _create_baseline() {
 _main() {
   # First we check if pre-commit is already configured
   if git config --get core.hooksPath &>/dev/null; then
-    echo "⚠️  Pre-commit hooks are already configured. Aborting..."
+    echo " Pre-commit hooks are already configured. Aborting..."
     return 0
   fi
 
@@ -214,7 +214,7 @@ _main() {
 
   _create_baseline
 
-  echo "✅ Pre-commit hooks configured successfully!"
+  echo "Pre-commit hooks configured successfully!"
 }
 
 _main "$@"

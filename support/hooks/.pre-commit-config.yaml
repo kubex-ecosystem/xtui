@@ -1,31 +1,15 @@
-# .pre-commit-config.yaml
-
-default_language_version:
-  python: python3
-  node: 22.19.0
-
-exclude: |
-  (?x)^(
-    node_modules/|
-    dist/|build/|coverage/|
-    vendor/|
-    support/|
-    tests/generated/
-  )
-
 repos:
-  # - repo: local
-  #   hooks:
-  #     - id: docs-sanitize
-  #       name: docs-sanitize (deny secrets-looking strings in docs)
-  #       entry: python3 support/hooks/.check_docs_secrets.py
-  #       language: system
-  #       files: \.(md|mdx|rst|txt|adoc|html)$
-  #       always_run: true
+  - repo: local
+    hooks:
+      - id: docs-sanitize
+        name: docs-sanitize (deny secrets-looking strings in docs)
+        entry: python3 support/hooks/.check_docs_secrets.py
+        language: system
+        files: \.(md|mdx|rst|txt|adoc|html)$
 
-  # -------- Hygiene --------
+  # -------- Hygiene básica --------
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -34,79 +18,67 @@ repos:
       - id: check-added-large-files
         args: ["--maxkb=1512"]
 
-  # -------- ESLint (Node env) --------
-  # - repo: https://github.com/pre-commit/mirrors-eslint
-  #   rev: v9.11.1
-  #   hooks:
-  #     - id: eslint
-  #       files: \.(js|jsx|ts|tsx)$
-  #       additional_dependencies:
-  #         - eslint@9.11.1
-  #         - typescript@5.6.3
-  #         - "@typescript-eslint/parser@7.18.0"
-  #         - "@typescript-eslint/eslint-plugin@7.18.0"
-  #         - eslint-plugin-react@7.35.0
-  #         - eslint-plugin-react-hooks@4.6.2
-  #         - eslint-plugin-import@2.29.1
-  #         - eslint-plugin-jsx-a11y@6.9.0
-  #       args:
-  #         [
-  #           "--config","support/hooks/.eslintrc.json",
-  #           "--fix"
-  #         ]
-
-  # -------- Markdown --------
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.41.0
-    hooks:
-      - id: markdownlint
-        files: \.(md|mdx)$
-        args: ["--config", "support/hooks/.markdownlint.yaml"]
-
-  # -------- Detect Secrets (rápido) --------
+  # -------- Segurança: detect-secrets --------
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
         args: ["--baseline", ".secrets.baseline"]
-        exclude: (^docs/.*$|^pnpm-lock\.yaml$|^frontend/src/locales/.*$)
-        files: ^(.*\.(go|ya?ml|json|tf|tfvars|sh|ps1|ts|tsx|js|jsx)$)
+        exclude: '(^config/gnyx_google_auth_client\.json$|^config/mailer_config\.json$|^docs/.*$|^README\.md$|^internal/sockets/messagery/rabbitmq\.go$|^frontend/tsconfig\.json$|^docs/swagger\.json$|^frontend/src/locales/.*$|^internal/config/config\.go$$)'
+        files: '^(.*\.go$|.*\.yaml$|.*\.yml$|.*\.json$|.*\.tf$|.*\.tfvars$|.*\.sh$|.*\.ps1$)'
+      # - id: detect-secrets-hook
+      #   name: detect-secrets-hook
+      #   entry: detect-secrets-hook
+      #   args: ["--baseline", ".secrets.baseline"]
+      #   exclude: '(^docs/.*$|^README\.md$|^internal/sockets/messagery/rabbitmq\.go$)'
+      #   files: '^(.*\.go$|.*\.yaml$|.*\.yml$|.*\.json$|.*\.tf$|.*\.tfvars$|.*\.sh$|.*\.ps1$)'
+      #   pragma: allowlist secret secret
+      #     dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",pgConfig.Username, pgConfig.Password, pgConfig.Host, port, pgConfig.Name)
 
-  # -------- Segurança pesada (pre-push) --------
-  - repo: https://github.com/returntocorp/semgrep
-    rev: v1.73.0
+  # -------- Segurança: semgrep --------
+  # - repo: https://github.com/returntocorp/semgrep
+  #   rev: v1.35.0
+  #   hooks:
+  #     - id: semgrep
+  #       args:
+  #         [
+  #           "--config=auto",
+  #           "--exclude=vendor/",
+  #           "--exclude=docs/",
+  #           "--exclude=support/",
+  #         ]
+  #       files: '^(.*\.go$|.*\.yaml$|.*\.yml$|.*\.json$|.*\.tf$|.*\.tfvars$|.*\.sh$|.*\.ps1$)'
+
+  # -------- Segurança: bandit --------
+  # - repo: https://github.com/PyCQA/bandit
+  #   rev: v1.7.0
+  #   hooks:
+  #     - id: bandit
+  #       args: ["-r", "."]
+
+  # -------- Segurança: gitleaks --------
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.28.0
     hooks:
-      - id: semgrep
-        stages: [pre-push]
+      - id: gitleaks
+        name: gitleaks
+        entry: gitleaks
+        language: system
         pass_filenames: false
         args:
           [
-            "--timeout",
-            "120",
-            "--config",
-            "support/hooks/.semgrep.yaml",
-            "--exclude",
-            "vendor/",
-            "--exclude",
-            "node_modules/",
-            "--exclude",
-            "dist/",
-            "--exclude",
-            "build/",
-            "--exclude",
-            "coverage/",
-          ]
-        files: ^(.*\.(go|ya?ml|json|tf|tfvars|sh|ps1|ts|tsx|js|jsx)$)
-
-  - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.18.4
-    hooks:
-      - id: gitleaks
-        stages: [pre-push]
-        args:
-          [
             "protect",
+            "--staged",
             "--no-banner",
-            "--redact",
             "--config=support/hooks/.gitleaks.toml",
           ]
+
+  # -------- Go tools --------
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+      # - id: go-vet
+      - id: go-mod-tidy
+        # - id: golangci-lint
+        # args: ["run", "--config=./support/.golangci.yaml"]

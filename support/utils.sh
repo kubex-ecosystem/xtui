@@ -2,12 +2,12 @@
 # lib/utils.sh – Utility functions
 
 # set -o posix
-set -o nounset           # Treat unset variables as an error
-set -o errexit           # Exit immediately if a command exits with a non-zero status
-set -o pipefail          # Prevent errors in a pipeline from being masked
-set -o errtrace          # If a command fails, the shell will exit immediately
-set -o functrace         # If a function fails, the shell will exit immediately
-shopt -s inherit_errexit # Inherit the errexit option in functions
+set -o nounset   # Treat unset variables as an error
+set -o errexit   # Exit immediately if a command exits with a non-zero status
+set -o pipefail  # Prevent errors in a pipeline from being masked
+set -o errtrace  # If a command fails, the shell will exit immediately
+set -o functrace # If a function fails, the shell will exit immediately
+# shopt -s inherit_errexit # Inherit the errexit option in functions
 IFS=$'\n\t'
 
 # Color codes for logs
@@ -20,69 +20,23 @@ _FATAL="\033[0;41m"
 _TRACE="\033[0;34m"
 _NC="\033[0m"
 
-log() {
-  local _type=${1:-info}
-  local _message=${2:-}
-  local _debug=${3:-}
-  _debug="${_debug:-${DEBUG:-${_DEBUG:-false}}}"
-
-  case $_type in
-    question | _QUESTION | -q | -Q)
-      if [[ ${_debug:-false} == "true" ]]; then
-        printf '%b[QUESTION]%b ❓  %s: ' "${_NOTICE:-\033[0;35m}" "${_NC:-\033[0m}" "$_message"
-      fi
-      ;;
-    notice | _NOTICE | -n | -N)
-      if [[ ${_debug:-false} == "true" ]]; then
-        printf '%b[NOTICE]%b 📝  %s\n' "${_NOTICE:-\033[0;35m}" "${_NC:-\033[0m}" "$_message"
-      fi
-      ;;
-    info | _INFO | -i | -I)
-      if [[ ${_debug:-false} == "true" ]]; then
-        printf '%b[INFO]%b ℹ️  %s\n' "${_INFO:-\033[0;36m}" "${_NC:-\033[0m}" "$_message"
-      fi
-      ;;
-    warn | _WARN | -w | -W)
-      if [[ ${_debug:-false} == "true" ]]; then
-        printf '%b[WARN]%b ⚠️  %s\n' "${_WARN:-\033[0;33m}" "${_NC:-\033[0m}" "$_message"
-      fi
-      ;;
-    error | _ERROR | -e | -E)
-      printf '%b[ERROR]%b ❌  %s\n' "${_ERROR:-\033[0;31m}" "${_NC:-\033[0m}" "$_message" >&2
-      ;;
-    success | _SUCCESS | -s | -S)
-      printf '%b[SUCCESS]%b ✅  %s\n' "${_SUCCESS:-\033[0;32m}" "${_NC:-\033[0m}" "$_message"
-      ;;
-    fatal | _FATAL | -f | -F)
-      printf '%b[FATAL]%b 💀  %s\n' "${_FATAL:-\033[0;41m}" "${_NC:-\033[0m}" "Exiting due to fatal error: $_message" >&2
-
-      if [[ ${4:-false} == "true" || ${_DEBUG:-false} == "true" || ${_FORCE_CLEAN:-false} == "true" ]]; then
-        clear_build_artifacts || true
-      fi
-
-      clear_script_cache || true
-
-      # shellcheck disable=SC2317
-      exit 1 || kill -9 $$
-      ;;
-    separator | _SEPARATOR | hr | -hr | -HR | line)
-      # if [[ "${_debug:-false}" != "true" ]]; then
-      local _columns=${COLUMNS:-$(tput cols || echo 80)}
-      local _margin=$((_columns - (_columns / 2)))
-      _message="${_message// /¬}"
-      _message="$(printf '%b%s%b %*s' "${_TRACE:-\033[0;34m}" "${_message:-}" "${_NC:-\033[0m}" "$((_columns - ("${#_message}" + _margin)))" '')"
-      _message="${_message// /\#}"
-      _message="${_message//¬/ }"
-      printf '%s\n' "${_message:-}" >&2
-      # fi
-      ;;
-    *)
-      log "info" "$_message" "${_debug:-false}" || true
-      ;;
-  esac
-
+# shellcheck disable=SC1090
+__source_script_if_needed() {
+  local _check_declare="${1:-}"
+  local _script_path="${2:-}"
+  # shellcheck disable=SC2065
+  if test -z "$(declare -f "${_check_declare:-}")" >/dev/null; then
+    # shellcheck source=/dev/null
+    source "${_script_path:-}" || {
+      echo "Error: Could not source ${_script_path:-}. Please ensure it exists." >&2
+      return 1
+    }
+  fi
   return 0
 }
+
+_SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"
+__source_script_if_needed "log_shell" "${_SCRIPT_DIR:-}/logging.sh" || exit 1
 
 clear_screen() {
   if [[ ${_QUIET:-false} != "true" && ${_DEBUG:-false} != "true" ]]; then
@@ -108,7 +62,7 @@ get_current_shell() {
 # Creates a temporary directory for cache
 _TEMP_DIR="${_TEMP_DIR:-$(mktemp -d)}"
 if [[ -d ${_TEMP_DIR:-} ]]; then
-  log info "Temporary directory created: ${_TEMP_DIR:-}"
+  log debug "Temporary directory created: ${_TEMP_DIR:-}"
 else
   log error "Failed to create the temporary directory."
 fi
@@ -122,9 +76,9 @@ clear_script_cache() {
   if [[ -d ${_TEMP_DIR:-} ]] && sudo -v 2>/dev/null; then
     sudo rm -rf "${_TEMP_DIR:-}"
     if [[ -d ${_TEMP_DIR:-} ]]; then
-      printf '%b[ERROR]%b ❌  %s\n' "${_ERROR:-\033[0;31m}" "${_NC:-\033[0m}" "Failed to remove the temporary directory: ${_TEMP_DIR:-}"
+      printf '%b[ERROR]%b  %s\n' "${_ERROR:-\033[0;31m}" "${_NC:-\033[0m}" "Failed to remove the temporary directory: ${_TEMP_DIR:-}"
     else
-      printf '%b[SUCCESS]%b ✅  %s\n' "${_SUCCESS:-\033[0;32m}" "${_NC:-\033[0m}" "Temporary directory removed: ${_TEMP_DIR:-}"
+      printf '%b[SUCCESS]%b  %s\n' "${_SUCCESS:-\033[0;32m}" "${_NC:-\033[0m}" "Temporary directory removed: ${_TEMP_DIR:-}"
     fi
   fi
   return 0
@@ -134,14 +88,14 @@ clear_build_artifacts() {
   clear_script_cache
   local build_dir="${_ROOT_DIR:-$(realpath '../')}/dist"
   if [[ -d ${build_dir} ]]; then
-    rm -rf "${build_dir}" || true
     if [[ -d ${build_dir} ]]; then
-      log error "Failed to remove build artifacts in ${build_dir}."
+      log warn "Build artifacts NOT removed from ${build_dir}."
     else
-      log success "Build artifacts removed from ${build_dir}."
+      log warn "Build artifacts NOT removed from ${build_dir}."
     fi
   else
-    log notice "No build artifacts found in ${build_dir}."
+    # log notice "No build artifacts found in ${build_dir}."
+    log warn "Build artifacts NOT found in ${build_dir}."
   fi
 }
 
@@ -167,6 +121,7 @@ set_trap() {
 }
 
 export -f log
+export -f log_shell
 export -f clear_screen
 export -f get_current_shell
 export -f clear_script_cache

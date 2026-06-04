@@ -2,8 +2,8 @@
 # lib/install_funcs.sh – Functions for installing binaries and managing paths
 
 install_upx() {
-    if ! command -v upx &> /dev/null; then
-        if ! sudo -v &> /dev/null; then
+    if ! command -v upx &>/dev/null; then
+        if ! sudo -v &>/dev/null; then
             log error "You do not have permission to install UPX."
             log warn "If you want binary packing, please install UPX manually."
             log warn "See: https://upx.github.io/"
@@ -11,23 +11,23 @@ install_upx() {
         fi
         if [[ "$(uname)" == "Darwin" ]]; then
             brew install upx >/dev/null
-        elif command -v apt-get &> /dev/null; then
+        elif command -v apt-get &>/dev/null; then
             sudo apt-get install -y upx >/dev/null
-        elif command -v yum &> /dev/null; then
+        elif command -v yum &>/dev/null; then
             sudo yum install -y upx >/dev/null
-        elif command -v dnf &> /dev/null; then
+        elif command -v dnf &>/dev/null; then
             sudo dnf install -y upx >/dev/null
-        elif command -v pacman &> /dev/null; then
+        elif command -v pacman &>/dev/null; then
             sudo pacman -S --noconfirm upx >/dev/null
-        elif command -v zypper &> /dev/null; then
+        elif command -v zypper &>/dev/null; then
             sudo zypper install -y upx >/dev/null
-        elif command -v apk &> /dev/null; then
+        elif command -v apk &>/dev/null; then
             sudo apk add upx >/dev/null
-        elif command -v port &> /dev/null; then
+        elif command -v port &>/dev/null; then
             sudo port install upx >/dev/null
-        elif command -v snap &> /dev/null; then
+        elif command -v snap &>/dev/null; then
             sudo snap install upx >/dev/null
-        elif command -v flatpak &> /dev/null; then
+        elif command -v flatpak &>/dev/null; then
             sudo flatpak install flathub org.uptane.upx -y >/dev/null
         else
             log warn "If you want binary packing, please install UPX manually."
@@ -76,7 +76,7 @@ add_to_path() {
 
     shell_rc_file="$(detect_shell_rc)"
 
-    if [[ -z "$shell_rc_file" ]]; then
+    if [[ -z $shell_rc_file ]]; then
         log error "Could not identify the shell configuration file."
         return 1
     fi
@@ -85,17 +85,17 @@ add_to_path() {
         return 0
     fi
 
-    if [[ -z "${target_path}" ]]; then
+    if [[ -z ${target_path} ]]; then
         log error "Target path not provided."
         return 1
     fi
 
-    if [[ ! -d "${target_path}" ]]; then
+    if [[ ! -d ${target_path} ]]; then
         log error "Target path is not a valid directory: $target_path"
         return 1
     fi
 
-    if [[ ! -f "${shell_rc_file}" ]]; then
+    if [[ ! -f ${shell_rc_file} ]]; then
         log error "Configuration file not found: ${shell_rc_file}"
         return 1
     fi
@@ -130,11 +130,11 @@ install_binary() {
         add_to_path "$_GLOBAL_BIN"
     fi
 
-    if [[ -n "$shell_rc_file" ]]; then
-      # shellcheck source=/dev/null
-      . "${shell_rc_file:-$(detect_shell_rc)}" || {
-          log warn "Failed to reload shell configuration. Please run 'source ${shell_rc_file}' manually."
-      }
+    if [[ -n $shell_rc_file ]]; then
+        # shellcheck source=/dev/null
+        . "${shell_rc_file:-$(detect_shell_rc)}" || {
+            log warn "Failed to reload shell configuration. Please run 'source ${shell_rc_file}' manually."
+        }
     fi
 }
 uninstall_binary() {
@@ -153,32 +153,32 @@ uninstall_binary() {
     local shell_rc_file=""
     shell_rc_file="$(detect_shell_rc)"
 
-    if [[ -n "$shell_rc_file" ]]; then
-      # shellcheck source=/dev/null
-      . "${shell_rc_file:-$(detect_shell_rc)}" || {
-          log warn "Failed to reload shell configuration. Please run 'source ${shell_rc_file}' manually."
-      }
+    if [[ -n $shell_rc_file ]]; then
+        # shellcheck source=/dev/null
+        . "${shell_rc_file:-$(detect_shell_rc)}" || {
+            log warn "Failed to reload shell configuration. Please run 'source ${shell_rc_file}' manually."
+        }
     fi
 
     return 0
 }
 download_binary() {
-    if [[ "${_PRIVATE_REPOSITORY:-}" == "true" ]]; then
-        log error "It is not possible to download from a private repository." true
-        log error "Please clone the repository and build the binary locally." true
+    if [[ ${_PRIVATE_REPOSITORY:-} == "true" ]]; then
+        log error "It is not possible to download from a private repository."
+        log error "Please clone the repository and build the binary locally."
         return 1
     fi
     if ! what_platform; then
         log error "Failed to detect platform."
         return 1
     fi
-    if [[ -z "${_PLATFORM}" ]]; then
+    if [[ -z ${_PLATFORM} ]]; then
         log error "Unsupported platform: ${_PLATFORM}"
         return 1
     fi
     local version
-    if [[ -z "${_VERSION}" ]]; then
-        version="${_REPOSITORY}/releases/latest"  # Use latest release if version is not specified
+    if [[ -z ${_VERSION} ]]; then
+        version="${_REPOSITORY}/releases/latest" # Use latest release if version is not specified
     else
         version="${_REPOSITORY}/releases/tag/${_VERSION}"
     fi
